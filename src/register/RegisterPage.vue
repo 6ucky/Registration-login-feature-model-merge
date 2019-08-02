@@ -23,6 +23,33 @@
                 <div v-if="submitted && errors.has('password')" class="invalid-feedback">{{ errors.first('password') }}</div>
             </div>
             <div class="form-group">
+                 <span>Status:</span>
+                <select v-model="user.status">
+                    <option disabled value="">Select</option>
+                    <option>Expert</option>
+                    <option>Novice</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <span>Role:</span>
+                <select v-model="user.role">
+                    <option disabled value="">Select</option>
+                    <option>Engineer</option>
+                    <option>Product manager</option>
+                    <option>Saler</option>
+                    <option>Customer</option>
+                    <option>User</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="regle">Substitution rules :</label> <br/>
+                <input type="checkbox" v-model="user.MCS.r1"/>SR1: Most complete product (Full option) <br/>
+                <input type="checkbox" v-model="user.MCS.r2"/>SR2: Simplest product (Minimum of options) <br/>
+                <input type="checkbox" v-model="user.MCS.r3"/>SR3: Product similar to a past configuration <br/>
+                <input type="checkbox" v-model="user.MCS.r4"/>SR4: Product configured by a similar profile <br/>
+                <input type="checkbox" v-model="user.MCS.r5"/>SR5: Prioritize my explicit configuration decisions <br/>
+            </div>
+            <div class="form-group">
                 <button class="btn btn-primary" :disabled="status.registering">Register</button>
                 <img v-show="status.registering" src="data:image/gif;base64,R0lGODlhEAAQAPIAAP///wAAAMLCwkJCQgAAAGJiYoKCgpKSkiH/C05FVFNDQVBFMi4wAwEAAAAh/hpDcmVhdGVkIHdpdGggYWpheGxvYWQuaW5mbwAh+QQJCgAAACwAAAAAEAAQAAADMwi63P4wyklrE2MIOggZnAdOmGYJRbExwroUmcG2LmDEwnHQLVsYOd2mBzkYDAdKa+dIAAAh+QQJCgAAACwAAAAAEAAQAAADNAi63P5OjCEgG4QMu7DmikRxQlFUYDEZIGBMRVsaqHwctXXf7WEYB4Ag1xjihkMZsiUkKhIAIfkECQoAAAAsAAAAABAAEAAAAzYIujIjK8pByJDMlFYvBoVjHA70GU7xSUJhmKtwHPAKzLO9HMaoKwJZ7Rf8AYPDDzKpZBqfvwQAIfkECQoAAAAsAAAAABAAEAAAAzMIumIlK8oyhpHsnFZfhYumCYUhDAQxRIdhHBGqRoKw0R8DYlJd8z0fMDgsGo/IpHI5TAAAIfkECQoAAAAsAAAAABAAEAAAAzIIunInK0rnZBTwGPNMgQwmdsNgXGJUlIWEuR5oWUIpz8pAEAMe6TwfwyYsGo/IpFKSAAAh+QQJCgAAACwAAAAAEAAQAAADMwi6IMKQORfjdOe82p4wGccc4CEuQradylesojEMBgsUc2G7sDX3lQGBMLAJibufbSlKAAAh+QQJCgAAACwAAAAAEAAQAAADMgi63P7wCRHZnFVdmgHu2nFwlWCI3WGc3TSWhUFGxTAUkGCbtgENBMJAEJsxgMLWzpEAACH5BAkKAAAALAAAAAAQABAAAAMyCLrc/jDKSatlQtScKdceCAjDII7HcQ4EMTCpyrCuUBjCYRgHVtqlAiB1YhiCnlsRkAAAOwAAAAAAAAAAAA==" />
                 <router-link to="/login" class="btn btn-link">Cancel</router-link>
@@ -41,7 +68,16 @@ export default {
                 firstName: '',
                 lastName: '',
                 username: '',
-                password: ''
+                password: '',
+                MCS:{
+                    r1: false,
+                    r2: false,
+                    r3: false,
+                    r4: false,
+                    r5: false
+                },
+                status: '',
+                role: ''
             },
             submitted: false
         }

@@ -1,19 +1,16 @@
 <template>
     <div>
-        <h1>Hi {{account.user.firstName}}!</h1>
-        <p>r1: {{account.user.r1}}</p>
-        <p>r2: {{account.user.r2}}</p>
-        <p>r3: {{account.user.r3}}</p>
-        <p>r4: {{account.user.r4}}</p>
-        <p>r5: {{account.user.r5}}</p>
-        <p>Status: {{account.user.status}}</p>
-        <p>Role: {{account.user.role}}</p>
-        <div class="line_02"></div>
-        <div>
-            <label >Please Upload your Feature Model </label>
-            <input type="file" @change="processFile($event)">
-        </div>
-        <subcotalogue></subcotalogue>
+        <h3>Users from secure api end point:</h3>
+        <em v-if="users.loading">Loading users...</em>
+        <span v-if="users.error" class="text-danger">ERROR: {{users.error}}</span>
+        <ul v-if="users.items">
+            <li v-for="user in users.items" :key="user.id">
+                {{user.firstName + ' ' + user.lastName}}
+                <span v-if="user.deleting"><em> - Deleting...</em></span>
+                <span v-else-if="user.deleteError" class="text-danger"> - ERROR: {{user.deleteError}}</span>
+                <span v-else> - <a @click="deleteUser(user.id)" class="text-danger">Delete</a></span>
+            </li>
+        </ul>
         <p>
             <router-link to="/login">Logout</router-link>
         </p>
@@ -21,15 +18,9 @@
 </template>
 
 <script>
-import Bus from '../_helpers/bus.js'
-import xml2json from '../_helpers/xml2json.js'
 import { mapState, mapActions } from 'vuex'
-import subcotalogue from './sub_cotalogue.vue'
 
 export default {
-    components:{
-        subcotalogue,
-    },
     computed: {
         ...mapState({
             account: state => state.account,
@@ -61,13 +52,3 @@ export default {
     }
 };
 </script>
-
-<style scoped>
-
-.line_02{
-    height: 2px;
-    border-top: 2px solid #aaa;
-    text-align: center;
-    margin-bottom: 12px;
-}
-</style>

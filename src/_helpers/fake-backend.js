@@ -13,6 +13,16 @@ export function configureFakeBackend() {
                     // get parameters from post request
                     let params = JSON.parse(opts.body);
 
+                    if(params.username === 'admin' && params.password === 'admin')
+                    {
+                        let responseJson = {
+                            username: params.username,
+                            token: 'fake-jwt-token'
+                        };
+                        resolve({ ok: true, text: () => Promise.resolve(JSON.stringify(responseJson)) });
+                        return;
+                    }
+
                     // find if any user matches login credentials
                     let filteredUsers = users.filter(user => {
                         return user.username === params.username && user.password === params.password;

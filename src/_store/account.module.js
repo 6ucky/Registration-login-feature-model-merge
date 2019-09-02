@@ -14,7 +14,10 @@ const actions = {
             .then(
                 user => {
                     commit('loginSuccess', user);
-                    router.push('/');
+                    if(username === 'admin')
+                        router.push('/admin');
+                    else
+                        router.push('/');
                 },
                 error => {
                     commit('loginFailure', error);

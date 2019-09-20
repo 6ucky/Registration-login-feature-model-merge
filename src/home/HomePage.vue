@@ -1,14 +1,40 @@
 <template>
     <div>
         <h1>Hi {{account.user.firstName}}!</h1>
-        <p>r1: {{account.user.r1}}</p>
-        <p>r2: {{account.user.r2}}</p>
-        <p>r3: {{account.user.r3}}</p>
-        <p>r4: {{account.user.r4}}</p>
-        <p>r5: {{account.user.r5}}</p>
-        <p>Status: {{account.user.status}}</p>
-        <p>Role: {{account.user.role}}</p>
-        <div class="line_02"></div>
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th scope="col">R1</th>
+                    <th scope="col">R2</th>
+                    <th scope="col">R3</th>
+                    <th scope="col">R4</th>
+                    <th scope="col">R5</th>
+                    <th scope="col">Status</th>
+                    <th scope="col">Role</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>
+                        <i :class="[account.user.r1?'fas fa-check':'fas fa-times']"></i>
+                    </td>
+                    <td>
+                        <i :class="[account.user.r2?'fas fa-check':'fas fa-times']"></i>
+                    </td>
+                    <td>
+                        <i :class="[account.user.r3?'fas fa-check':'fas fa-times']"></i>
+                    </td>
+                    <td>
+                        <i :class="[account.user.r4?'fas fa-check':'fas fa-times']"></i>
+                    </td>
+                    <td>
+                        <i :class="[account.user.r5?'fas fa-check':'fas fa-times']"></i>
+                    </td>
+                    <td>{{account.user.status}}</td>
+                    <td>{{account.user.role}}</td>
+                </tr>
+            </tbody>
+        </table>
         <div>
             <label >Please Upload your Feature Model </label>
             <input type="file" @change="processFile($event)">
@@ -64,10 +90,4 @@ export default {
 
 <style scoped>
 
-.line_02{
-    height: 2px;
-    border-top: 2px solid #aaa;
-    text-align: center;
-    margin-bottom: 12px;
-}
 </style>

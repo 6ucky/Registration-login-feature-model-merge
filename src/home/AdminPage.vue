@@ -29,7 +29,6 @@ export default {
     },
     created () {
         this.getAllUsers();
-        console.log(this.account.user);
     },
     methods: {
         ...mapActions('users', {

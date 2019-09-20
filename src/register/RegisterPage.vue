@@ -35,7 +35,7 @@
                 <select v-model="user.role">
                     <option disabled value="">Select</option>
                     <option>Engineer</option>
-                    <option>Product manager</option>
+                    <option>Product Manager</option>
                     <option>Saler</option>
                     <option>Customer</option>
                     <option>User</option>

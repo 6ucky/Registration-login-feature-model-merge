@@ -4,6 +4,7 @@ import Vuex from 'vuex';
 import { alert } from './alert.module';
 import { account } from './account.module';
 import { users } from './users.module';
+import { models } from './model.module';
 
 Vue.use(Vuex);
 

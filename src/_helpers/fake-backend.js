@@ -1,5 +1,6 @@
 // array in local storage for registered users
 let users = JSON.parse(localStorage.getItem('users')) || [];
+let models = JSON.parse(localStorage.getItem('models')) || [];
     
 export function configureFakeBackend() {
     let realFetch = window.fetch;
@@ -41,6 +42,7 @@ export function configureFakeBackend() {
                             r3: user.MCS.r3,
                             r4: user.MCS.r4,
                             r5: user.MCS.r5,
+                            model_selections: user.model_selections,
                             status: user.status,
                             role: user.role,
                             token: 'fake-jwt-token'
@@ -53,12 +55,125 @@ export function configureFakeBackend() {
 
                     return;
                 }
+                // add models
+                if (url.endsWith('/models/add') && opts.method === 'POST') {
+                    // get parameters from post request
+                    let newModel = JSON.parse(opts.body);
+
+                    // validation
+                    let duplicateUser = models.filter(model => { return model.modelname === newModel.modelname; }).length;
+                    if (duplicateUser) {
+                        reject('Modelname "' + newModel.modelname + '" is already taken');
+                        return;
+                    }
+
+                    let current_user = newModel.user;
+                    // save new model
+                    newModel.id = models.length ? Math.max(...models.map(model => model.id)) + 1 : 1;
+                    delete newModel.user;
+                    models.push(newModel);
+                    localStorage.setItem('models', JSON.stringify(models));
+
+                    for(let i = 0; i < users.length; i++)
+                    {
+                        if(users[i].id === current_user.id)
+                        {
+                            let temp = {};
+                            temp.name = newModel.modelname;
+                            temp.selections = [];
+                            users[i].model_selections.push(temp);
+                            localStorage.setItem('users', JSON.stringify(users));
+                        }
+                    }
+
+                    // respond 200 OK
+                    resolve({ ok: true, text: () => Promise.resolve() });
+
+                    return;
+                }
+
+ // add models
+                if (url.endsWith('/models/add') && opts.method === 'POST') {
+                    // get parameters from post request
+                    let newModel = JSON.parse(opts.body);
+
+                    // validation
+                    let duplicateUser = models.filter(model => { return model.modelname === newModel.modelname; }).length;
+                    if (duplicateUser) {
+                        reject('Modelname "' + newModel.modelname + '" is already taken');
+                        return;
+                    }
+
+                    let current_user = newModel.user;
+                    // save new model
+                    newModel.id = models.length ? Math.max(...models.map(model => model.id)) + 1 : 1;
+                    delete newModel.user;
+                    models.push(newModel);
+                    localStorage.setItem('models', JSON.stringify(models));
+
+                    for(let i = 0; i < users.length; i++)
+                    {
+                        if(users[i].id === current_user.id)
+                        {
+                            let temp = {};
+                            temp.name = newModel.modelname;
+                            temp.selections = [];
+                            users[i].model_selections.push(temp);
+                            localStorage.setItem('users', JSON.stringify(users));
+                        }
+                    }
+
+                    // respond 200 OK
+                    resolve({ ok: true, text: () => Promise.resolve() });
+
+                    return;
+                }
+
+                 // add model selections
+                 if (url.endsWith('/models/addselections') && opts.method === 'POST') {
+                    // get parameters from post request
+                    let newModel = JSON.parse(opts.body);
+
+
+                    for(let i = 0; i < users.length; i++)
+                    {
+                        if(users[i].id === newModel.id)
+                        {
+                            for(let j = 0; j < users[i].model_selections.length; j++)
+                            {
+                                if(users[i].model_selections[j].name === newModel.modelname)
+                                {
+                                    users[i].model_selections[j].selections = newModel.selected_list;
+                                    localStorage.setItem('users', JSON.stringify(users));
+                                }
+                            }
+                        }
+                    }
+
+                    // respond 200 OK
+                    resolve({ ok: true, text: () => Promise.resolve() });
+
+                    return;
+                }
 
                 // get users
                 if (url.endsWith('/users') && opts.method === 'GET') {
                     // check for fake auth token in header and return users if valid, this security is implemented server side in a real application
                     if (opts.headers && opts.headers.Authorization === 'Bearer fake-jwt-token') {
                         resolve({ ok: true, text: () => Promise.resolve(JSON.stringify(users))});
+                    } else {
+                        // return 401 not authorised if token is null or invalid
+                        reject('Unauthorised');
+                    }
+
+                    return;
+                }
+
+                // get models
+                if (url.endsWith('/models') && opts.method === 'GET') {
+                    // check for fake auth token in header and return users if valid, this security is implemented server side in a real application
+                    if (opts.headers && opts.headers.Authorization === 'Bearer fake-jwt-token') {
+                        resolve({ ok: true, text: () => Promise.resolve(JSON.stringify(models))});
                     } else {
                         // return 401 not authorised if token is null or invalid
                         reject('Unauthorised');
@@ -123,6 +238,30 @@ export function configureFakeBackend() {
                                 // delete user
                                 users.splice(i, 1);
                                 localStorage.setItem('users', JSON.stringify(users));
+                                break;
+                            }
+                        }
+
+                        // respond 200 OK
+                        resolve({ ok: true, text: () => Promise.resolve() });
+                    } else {
+                        // return 401 not authorised if token is null or invalid
+                        reject('Unauthorised');
+                    }
+
+                    return;
+                }
+
+                // delete model
+                if (url.match(/\/models\/\d+$/) && opts.method === 'DELETE') {
+                    if (opts.headers && opts.headers.Authorization === 'Bearer fake-jwt-token') {
+                        let urlParts = url.split('/');
+                        let id = parseInt(urlParts[urlParts.length - 1]);
+                        for (let i = 0; i < s.length; i++) {
+                            let model = models[i];
+                            if (model.id === id) {
+                                models.splice(i, 1);
+                                localStorage.setItem('models', JSON.stringify(models));
                                 break;
                             }
                         }

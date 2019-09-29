@@ -58,6 +58,7 @@
 <script>
 /* eslint-disable */
 import Bus from '../_helpers/bus.js'
+import { mapState, mapActions } from 'vuex'
 export default {
 	data () {
 		return {
@@ -66,17 +67,38 @@ export default {
 			data: [],
 			// the cache to store the hierarchical tree
 			treecache: [],
-			xml:''
+			xml: '',
+			modelname: '',
+			id: ''
 		}
 	},
 	mounted: function() {
 		Bus.$on('getxml',xml=>{
-			this.xml = xml;
+			this.modelname = xml.name;
+			this.xml = xml.xmlobject;
 			this.mainprocess();
+			let cache = [];
+			for(let i = 0; i < account.user.model_selections.length; i++)
+			{
+				if(account.user.model_selections[i].name === this.modelname)
+				{
+					for(let j = 0; j < this.data.length; j++)
+					{
+						if(account.user.model_selections[i].selections.includes(this.data[j].data.nodeId))
+							this.data[j].data.tick = true;
+					}
+				}
+			}
 		});
 		this.mainprocess();
 	},
+	computed: {
+        ...mapState({
+            account: state => state.account
+        })
+    },
 	methods: {
+		...mapActions('model', ['new_model','addselections']),
 		/**
 		 * construct the element tree
 		 * @todo improve the rule of showing up elements
@@ -230,7 +252,11 @@ export default {
 				// 	this.$Notice.info({
                 //     	title: 'Xml to Tree',
                 //     	desc: 'Please put the root feature first!'
-                // 	});
+				// 	});
+				const { modelname, xml, id } = this;
+            	if (modelname && xml) {
+                	this.new_model({modelname, xml, id});
+            	}
 			}
 			// else
 			// 	this.$Notice.info({
@@ -533,6 +559,9 @@ export default {
 				if(this.data[i].data.tick)
 					selected_list.push(this.data[i].data.nodeId);
 			}
+			let id = account.user.id;
+			let name = this.modelname;
+			this.addselections({id ,selected_list, name});
 		},
 		/**
 		 * the rule of selections for checkbox

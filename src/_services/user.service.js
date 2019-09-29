@@ -8,7 +8,11 @@ export const userService = {
     getAll,
     getById,
     update,
-    delete: _delete
+    delete: _delete,
+    addmodel,
+    addselections,
+    getAllmodels,
+    deletemodels:_deletemodels
 };
 
 function login(username, password) {
@@ -46,6 +50,26 @@ function register(user) {
     return fetch(`${config.apiUrl}/users/register`, requestOptions).then(handleResponse);
 }
 
+function addmodel(user,modelname,xml,id) {
+    const requestOptions = {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({user,modelname,xml,id})
+    };
+
+    return fetch(`${config.apiUrl}/models/add`, requestOptions).then(handleResponse);
+}
+
+function addselections(id, selected_list, modelname) {
+    const requestOptions = {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({id, selected_list, modelname})
+    };
+
+    return fetch(`${config.apiUrl}/models/addselections`, requestOptions).then(handleResponse);
+}
+
 function getAll() {
     const requestOptions = {
         method: 'GET',
@@ -55,6 +79,14 @@ function getAll() {
     return fetch(`${config.apiUrl}/users`, requestOptions).then(handleResponse);
 }
 
+function getAllmodels() {
+    const requestOptions = {
+        method: 'GET',
+        headers: authHeader()
+    };
+
+    return fetch(`${config.apiUrl}/models`, requestOptions).then(handleResponse);
+}
 
 function getById(id) {
     const requestOptions = {
@@ -83,6 +115,15 @@ function _delete(id) {
     };
 
     return fetch(`${config.apiUrl}/users/${id}`, requestOptions).then(handleResponse);
+}
+
+function _deletemodels(id) {
+    const requestOptions = {
+        method: 'DELETE',
+        headers: authHeader()
+    };
+
+    return fetch(`${config.apiUrl}/models/${id}`, requestOptions).then(handleResponse);
 }
 
 function handleResponse(response) {

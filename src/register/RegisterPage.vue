@@ -77,7 +77,8 @@ export default {
                     r5: false
                 },
                 status: '',
-                role: ''
+                role: '',
+                model_selections: []
             },
             submitted: false
         }

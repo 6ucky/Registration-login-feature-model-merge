@@ -49,7 +49,7 @@
 <script>
 import Bus from '../_helpers/bus.js'
 import xml2json from '../_helpers/xml2json.js'
-import { mapState, mapActions } from 'vuex'
+import { mapState} from 'vuex'
 import subcotalogue from './sub_cotalogue.vue'
 
 export default {
@@ -58,19 +58,10 @@ export default {
     },
     computed: {
         ...mapState({
-            account: state => state.account,
-            users: state => state.users.all
+            account: state => state.account
         })
     },
-    created () {
-        this.getAllUsers();
-        console.log(this.account.user);
-    },
     methods: {
-        ...mapActions('users', {
-            getAllUsers: 'getAll',
-            deleteUser: 'delete'
-        }),
         processFile(event) {
             this.initlevel = 0;
             var xmlDoc = '';
@@ -80,7 +71,8 @@ export default {
                 //console.log(event.target.result);
                 xmlDoc = (new DOMParser()).parseFromString(event.target.result,"text/xml");
                 var xmlobject = JSON.parse(xml2json(xmlDoc,''));
-                Bus.$emit('getxml',xmlobject);
+                let name = event.target.files[0].name;
+                Bus.$emit('getxml',{name,xmlobject});
             };
             reader.readAsText(file);
         }

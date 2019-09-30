@@ -7,9 +7,14 @@ const actions = {
     },
     addselections({ dispatch, commit }, {id ,selected_list, name}) {
         userService.addselections(id, selected_list, name);
+    },
+    user_new_model({ dispatch, commit }, {modelname,id})
+    {
+        userService.usernewmodel(modelname, id);
     }
 };
 
 export const model = {
+    namespaced: true,
     actions
 };

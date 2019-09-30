@@ -16,10 +16,16 @@
         <span v-if="models.error" class="text-danger">ERROR: {{models.error}}</span>
         <ul v-if="models.items">
             <li v-for="model in models.items" :key="model.id">
-                {{model.firstName + ' ' + model.lastName}}
+                {{model.modelname}}
                 <span v-if="model.deleting"><em> - Deleting...</em></span>
+                <span v-if="model.merging"><em> - Merging...</em></span>
                 <span v-else-if="model.deleteError" class="text-danger"> - ERROR: {{model.deleteError}}</span>
-                <span v-else> - <a @click="deleteModel(model.id)" class="text-danger">Delete</a></span>
+                <span v-else> 
+                    -
+                    <a @click="mergeModel(model.id)" class="text-danger">Merge</a>
+                    - 
+                    <a @click="deleteModel(model.id)" class="text-danger">Delete</a>
+                </span>
             </li>
         </ul>
         <p>
@@ -43,10 +49,10 @@ export default {
         this.getAllModels();
     },
     methods: {
-        ...mapActions(['users', {
+        ...mapActions('users', {
             getAllUsers: 'getAll',
             deleteUser: 'delete'
-        }]),
+        }),
         ...mapActions('models', {
             getAllModels: 'getAll',
             deleteModel: 'delete'

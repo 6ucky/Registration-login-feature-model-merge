@@ -59,6 +59,7 @@ const mutations = {
 };
 
 export const models = {
+    namespaced: true,
     state,
     actions,
     mutations

@@ -78,16 +78,29 @@ export default {
 			this.xml = xml.xmlobject;
 			this.mainprocess();
 			let cache = [];
-			for(let i = 0; i < account.user.model_selections.length; i++)
+			let checknewmodel = true;
+			if(this.account.user.model_selections !== undefined)
 			{
-				if(account.user.model_selections[i].name === this.modelname)
+				for(let i = 0; i < this.account.user.model_selections.length; i++)
 				{
-					for(let j = 0; j < this.data.length; j++)
+					if(this.account.user.model_selections[i].name === this.modelname)
 					{
-						if(account.user.model_selections[i].selections.includes(this.data[j].data.nodeId))
-							this.data[j].data.tick = true;
+						checknewmodel = false;
+						for(let j = 0; j < this.data.length; j++)
+						{
+							if(this.account.user.model_selections[i].selections.includes(this.data[j].data.nodeId))
+								this.data[j].data.tick = true;
+						}
 					}
 				}
+			}
+			if(checknewmodel)
+			{
+				const { modelname} = this;
+				let id = this.account.user.id;
+            	if (modelname && id) {
+                	this.user_new_model({modelname,id});
+            	}
 			}
 		});
 		this.mainprocess();
@@ -98,7 +111,7 @@ export default {
         })
     },
 	methods: {
-		...mapActions('model', ['new_model','addselections']),
+		...mapActions('model', ['new_model','addselections','user_new_model']),
 		/**
 		 * construct the element tree
 		 * @todo improve the rule of showing up elements
@@ -253,6 +266,7 @@ export default {
                 //     	title: 'Xml to Tree',
                 //     	desc: 'Please put the root feature first!'
 				// 	});
+				
 				const { modelname, xml, id } = this;
             	if (modelname && xml) {
                 	this.new_model({modelname, xml, id});
@@ -559,7 +573,7 @@ export default {
 				if(this.data[i].data.tick)
 					selected_list.push(this.data[i].data.nodeId);
 			}
-			let id = account.user.id;
+			let id = this.account.user.id;
 			let name = this.modelname;
 			this.addselections({id ,selected_list, name});
 		},

@@ -12,7 +12,8 @@ export const userService = {
     addmodel,
     addselections,
     getAllmodels,
-    deletemodels:_deletemodels
+    deletemodels:_deletemodels,
+    usernewmodel
 };
 
 function login(username, password) {
@@ -58,6 +59,16 @@ function addmodel(user,modelname,xml,id) {
     };
 
     return fetch(`${config.apiUrl}/models/add`, requestOptions).then(handleResponse);
+}
+
+function usernewmodel(modelname, id) {
+    const requestOptions = {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({modelname, id})
+    };
+
+    return fetch(`${config.apiUrl}/users/addmodel`, requestOptions).then(handleResponse);
 }
 
 function addselections(id, selected_list, modelname) {

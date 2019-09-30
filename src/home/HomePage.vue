@@ -67,11 +67,11 @@ export default {
             var xmlDoc = '';
             var file = event.target.files[0];
             var reader = new FileReader();
+            let name = event.target.files[0].name;
             reader.onload = function(event) {
                 //console.log(event.target.result);
                 xmlDoc = (new DOMParser()).parseFromString(event.target.result,"text/xml");
                 var xmlobject = JSON.parse(xml2json(xmlDoc,''));
-                let name = event.target.files[0].name;
                 Bus.$emit('getxml',{name,xmlobject});
             };
             reader.readAsText(file);

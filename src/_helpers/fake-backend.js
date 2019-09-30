@@ -63,7 +63,6 @@ export function configureFakeBackend() {
                     // validation
                     let duplicateUser = models.filter(model => { return model.modelname === newModel.modelname; }).length;
                     if (duplicateUser) {
-                        reject('Modelname "' + newModel.modelname + '" is already taken');
                         return;
                     }
 
@@ -74,25 +73,41 @@ export function configureFakeBackend() {
                     models.push(newModel);
                     localStorage.setItem('models', JSON.stringify(models));
 
-                    for(let i = 0; i < users.length; i++)
-                    {
-                        if(users[i].id === current_user.id)
-                        {
-                            let temp = {};
-                            temp.name = newModel.modelname;
-                            temp.selections = [];
-                            users[i].model_selections.push(temp);
-                            localStorage.setItem('users', JSON.stringify(users));
-                        }
-                    }
-
                     // respond 200 OK
                     resolve({ ok: true, text: () => Promise.resolve() });
 
                     return;
                 }
 
- // add models
+                if (url.endsWith('/users/addmodel') && opts.method === 'POST') {
+                    let temp = JSON.parse(opts.body);
+                    for(let i = 0; i < users.length; i++)
+                    {
+                        if(users[i].id === temp.id)
+                        {
+                            let checkpoint = true;
+                            for(let j = 0; j < users[i].model_selections.length; j++)
+                            {
+                                if(users[i].model_selections[j].name === temp.modelname)
+                                    checkpoint = false;
+                            }
+                            if(checkpoint)
+                            {
+                                let cache = {};
+                                cache.name = temp.modelname;
+                                cache.selections = [];
+                                users[i].model_selections.push(cache);
+                                localStorage.setItem('users', JSON.stringify(users));
+                            }
+                        }
+                    }
+                    // respond 200 OK
+                    resolve({ ok: true, text: () => Promise.resolve() });
+
+                    return;
+                }
+
+                // add models
                 if (url.endsWith('/models/add') && opts.method === 'POST') {
                     // get parameters from post request
                     let newModel = JSON.parse(opts.body);
@@ -257,12 +272,25 @@ export function configureFakeBackend() {
                     if (opts.headers && opts.headers.Authorization === 'Bearer fake-jwt-token') {
                         let urlParts = url.split('/');
                         let id = parseInt(urlParts[urlParts.length - 1]);
-                        for (let i = 0; i < s.length; i++) {
+                        let modelname = '';
+                        for (let i = 0; i < models.length; i++) {
                             let model = models[i];
                             if (model.id === id) {
+                                modelname = model.modelname;
                                 models.splice(i, 1);
                                 localStorage.setItem('models', JSON.stringify(models));
                                 break;
+                            }
+                        }
+                        for(let i = 0; i < users.length; i++)
+                        {
+                            for(let j = 0; j < users[i].model_selections.length; j++)
+                            {
+                                if(users[i].model_selections[j].name === modelname)
+                                {
+                                    users[i].model_selections.splice(j,1);
+                                    localStorage.setItem('users', JSON.stringify(users));
+                                }
                             }
                         }
 

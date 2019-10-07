@@ -96,6 +96,7 @@ export function configureFakeBackend() {
                                 let cache = {};
                                 cache.name = temp.modelname;
                                 cache.selections = [];
+                                cache.selections_name = [];
                                 users[i].model_selections.push(cache);
                                 localStorage.setItem('users', JSON.stringify(users));
                             }
@@ -133,6 +134,7 @@ export function configureFakeBackend() {
                             let temp = {};
                             temp.name = newModel.modelname;
                             temp.selections = [];
+                            temp.selections_name = [];
                             users[i].model_selections.push(temp);
                             localStorage.setItem('users', JSON.stringify(users));
                         }
@@ -159,6 +161,7 @@ export function configureFakeBackend() {
                                 if(users[i].model_selections[j].name === newModel.modelname)
                                 {
                                     users[i].model_selections[j].selections = newModel.selected_list;
+                                    users[i].model_selections[j].selections_name = newModel.selected_list_name;
                                     localStorage.setItem('users', JSON.stringify(users));
                                 }
                             }

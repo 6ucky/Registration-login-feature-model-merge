@@ -568,14 +568,18 @@ export default {
 			this.checkclick(index);
 			this.checkconstraints(index);
 			let selected_list = [];
+			let selected_list_name = [];
 			for(let i = 0; i < this.data.length; i++)
 			{
 				if(this.data[i].data.tick)
+				{
 					selected_list.push(this.data[i].data.nodeId);
+					selected_list_name.push(this.data[i].data.nodeName);
+				}
 			}
 			let id = this.account.user.id;
 			let name = this.modelname;
-			this.addselections({id ,selected_list, name});
+			this.addselections({id ,selected_list, selected_list_name, name});
 		},
 		/**
 		 * the rule of selections for checkbox

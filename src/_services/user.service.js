@@ -71,11 +71,11 @@ function usernewmodel(modelname, id) {
     return fetch(`${config.apiUrl}/users/addmodel`, requestOptions).then(handleResponse);
 }
 
-function addselections(id, selected_list, modelname) {
+function addselections(id, selected_list, selected_list_name, modelname) {
     const requestOptions = {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({id, selected_list, modelname})
+        body: JSON.stringify({id, selected_list, selected_list_name, modelname})
     };
 
     return fetch(`${config.apiUrl}/models/addselections`, requestOptions).then(handleResponse);

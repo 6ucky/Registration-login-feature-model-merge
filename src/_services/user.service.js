@@ -11,6 +11,7 @@ export const userService = {
     delete: _delete,
     addmodel,
     addselections,
+    adddisselections,
     getAllmodels,
     deletemodels:_deletemodels,
     usernewmodel
@@ -51,11 +52,11 @@ function register(user) {
     return fetch(`${config.apiUrl}/users/register`, requestOptions).then(handleResponse);
 }
 
-function addmodel(user,modelname,xml,id) {
+function addmodel(user,modelname,xml,data,id) {
     const requestOptions = {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({user,modelname,xml,id})
+        body: JSON.stringify({user,modelname,xml,data,id})
     };
 
     return fetch(`${config.apiUrl}/models/add`, requestOptions).then(handleResponse);
@@ -79,6 +80,16 @@ function addselections(id, selected_list, selected_list_name, modelname) {
     };
 
     return fetch(`${config.apiUrl}/models/addselections`, requestOptions).then(handleResponse);
+}
+
+function adddisselections(id, disselected_list, disselected_list_name, modelname) {
+    const requestOptions = {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({id, disselected_list, disselected_list_name, modelname})
+    };
+
+    return fetch(`${config.apiUrl}/models/adddisselections`, requestOptions).then(handleResponse);
 }
 
 function getAll() {

@@ -97,6 +97,8 @@ export function configureFakeBackend() {
                                 cache.name = temp.modelname;
                                 cache.selections = [];
                                 cache.selections_name = [];
+                                cache.disselections = [];
+                                cache.disselections_name = [];
                                 users[i].model_selections.push(cache);
                                 localStorage.setItem('users', JSON.stringify(users));
                             }
@@ -135,6 +137,8 @@ export function configureFakeBackend() {
                             temp.name = newModel.modelname;
                             temp.selections = [];
                             temp.selections_name = [];
+                            temp.disselections = [];
+                            temp.disselections_name = [];
                             users[i].model_selections.push(temp);
                             localStorage.setItem('users', JSON.stringify(users));
                         }
@@ -162,6 +166,34 @@ export function configureFakeBackend() {
                                 {
                                     users[i].model_selections[j].selections = newModel.selected_list;
                                     users[i].model_selections[j].selections_name = newModel.selected_list_name;
+                                    localStorage.setItem('users', JSON.stringify(users));
+                                }
+                            }
+                        }
+                    }
+
+                    // respond 200 OK
+                    resolve({ ok: true, text: () => Promise.resolve() });
+
+                    return;
+                }
+
+                 // add model disselections
+                 if (url.endsWith('/models/adddisselections') && opts.method === 'POST') {
+                    // get parameters from post request
+                    let newModel = JSON.parse(opts.body);
+
+
+                    for(let i = 0; i < users.length; i++)
+                    {
+                        if(users[i].id === newModel.id)
+                        {
+                            for(let j = 0; j < users[i].model_selections.length; j++)
+                            {
+                                if(users[i].model_selections[j].name === newModel.modelname)
+                                {
+                                    users[i].model_selections[j].disselections = newModel.disselected_list;
+                                    users[i].model_selections[j].disselections_name = newModel.disselected_list_name;
                                     localStorage.setItem('users', JSON.stringify(users));
                                 }
                             }

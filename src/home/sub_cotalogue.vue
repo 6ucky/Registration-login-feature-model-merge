@@ -40,11 +40,11 @@
 								style="color:gray;font-size: 16px;padding-left:4px">
 							</i>
 							<div class="form-check form-check-inline" style="float:right">
-								<input class="form-check-input" @click="item.data.tick = false;itemclick($index);" type="radio" :name="'inlineRadioOptions' + item.data.nodeId" id="inlineRadio2" :checked="!item.data.tick" :disabled="checkmandatorycircle($index)">
+								<input class="form-check-input" @click="item.data.tick = false;item.data.default_tick = true;itemclick($index);" type="radio" :name="'inlineRadioOptions' + item.data.nodeId" id="inlineRadio2" :checked="!item.data.tick && item.data.default_tick" :disabled="checkmandatorycircle($index)">
 								<label class="form-check-label" for="inlineRadio2"><i class="fas fa-times" style="color:red"></i></label>
 							</div>
 							<div class="form-check form-check-inline" style="float:right">
-								<input class="form-check-input" @click="item.data.tick = true;itemclick($index);" type="radio" :name="'inlineRadioOptions' + item.data.nodeId" id="inlineRadio1" :checked="item.data.tick" :disabled="checkmandatorycircle($index)">
+								<input class="form-check-input" @click="item.data.tick = true;item.data.default_tick = true;itemclick($index);" type="radio" :name="'inlineRadioOptions' + item.data.nodeId" id="inlineRadio1" :checked="item.data.tick && item.data.default_tick" :disabled="checkmandatorycircle($index)">
 								<label class="form-check-label" for="inlineRadio1"><i class="fas fa-check" style="color:green"></i></label>
 							</div>
 						</span>
@@ -90,7 +90,15 @@ export default {
 						for(let j = 0; j < this.data.length; j++)
 						{
 							if(this.account.user.model_selections[i].selections.includes(this.data[j].data.nodeId))
+							{
 								this.data[j].data.tick = true;
+								this.data[j].data.default_tick = true;
+							}
+							if(this.account.user.model_selections[i].disselections.includes(this.data[j].data.nodeId))
+							{
+								this.data[j].data.tick = false;
+								this.data[j].data.default_tick = true;
+							}
 						}
 					}
 				}
@@ -112,7 +120,7 @@ export default {
         })
     },
 	methods: {
-		...mapActions('model', ['new_model','addselections','user_new_model']),
+		...mapActions('model', ['new_model','addselections', 'adddisselections','user_new_model']),
 		/**
 		 * construct the element tree
 		 * @todo improve the rule of showing up elements
@@ -268,10 +276,6 @@ export default {
                 //     	desc: 'Please put the root feature first!'
 				// 	});
 				
-				const { modelname, xml, id } = this;
-            	if (modelname && xml) {
-                	this.new_model({modelname, xml, id});
-            	}
 			}
 			// else
 			// 	this.$Notice.info({
@@ -302,6 +306,10 @@ export default {
 					}
 				}
 			}
+			const { modelname, xml, data, id } = this;
+            if (modelname && xml && data) {
+            	this.new_model({modelname, xml, data, id});
+        	}
 		},
 		/**
 		 * insert the output of bundle in the element tree
@@ -492,6 +500,8 @@ export default {
 		 * @param {number} level the level of the element
 		 * @param {string} type the type of the element
 		 * @param {string} mandatory the mandatory of the element
+		 * @param {boolean} tick the selection and the disselection of features
+		 * @param {boolean} default_tick the undecided default features
 		 * @param {number} parentid the parent id in the element tree
 		 * @param {number} parentindex the index of parent in the element tree
  		 */
@@ -504,7 +514,8 @@ export default {
 					nodeId: newid,
 				    nodeName: name,
               		type: type,
-              		tick: false,
+					tick: false,
+					default_tick: false,
               		mandatory: mandatory,
 					parentId: parentid
 				},
@@ -570,6 +581,8 @@ export default {
 			this.checkconstraints(index);
 			let selected_list = [];
 			let selected_list_name = [];
+			let disselected_list = [];
+			let disselected_list_name = [];
 			for(let i = 0; i < this.data.length; i++)
 			{
 				if(this.data[i].data.tick)
@@ -577,10 +590,17 @@ export default {
 					selected_list.push(this.data[i].data.nodeId);
 					selected_list_name.push(this.data[i].data.nodeName);
 				}
+				if(this.data[i].data.default_tick && !this.data[i].data.tick)
+				{
+					disselected_list.push(this.data[i].data.nodeId);
+					disselected_list_name.push(this.data[i].data.nodeName);
+				}
 			}
 			let id = this.account.user.id;
 			let name = this.modelname;
+			let thisdata = this.data;
 			this.addselections({id ,selected_list, selected_list_name, name});
+			this.adddisselections({id ,disselected_list, disselected_list_name, name});
 		},
 		/**
 		 * the rule of selections for checkbox
@@ -599,7 +619,9 @@ export default {
 						for(let j = 0; j < this.data.length; j++)
 						{
 							if(this.data[j].data.parentId === this.data[index].data.parentId && j !== index)
+							{
 								this.data[j].data.tick = false;
+							}
 						}
 					}
 					// if(this.data[i].data.type === 'and')
@@ -624,6 +646,7 @@ export default {
 						if(this.data[i].data.nodeId === temp_parentid)
 						{
 							this.data[i].data.tick = true;
+							this.data[i].data.default_tick = true;
 							this.checkchildren(i);
 							temp_parentid = this.data[i].data.parentId;
 						}
@@ -681,7 +704,10 @@ export default {
 					for(let j = 0; j < this.data.length; j++)
 					{
 						if(this.data[j].data.nodeId === this.data[i].data.parentId && this.data[j].data.tick && this.checkmandatorycircle(i))
+						{
 							this.data[i].data.tick = true;
+							this.data[i].data.default_tick = true;
+						}
 					}
 				}
 			}
@@ -707,7 +733,7 @@ export default {
 			let modeltype = 'feature';
 			var xmlobject = this.xml;
 			// check all the relations
-			let rel_lists = ['rel_abstract_root','rel_abstract_abstract','rel_concrete_root','rel_concrete_abstract'];
+			let rel_lists = ['rel_abstract_root','rel_abstract_abstract','rel_concrete_root','rel_concrete_abstract','rel_concrete_concrete'];
 			for(let x = 0; x < rel_lists.length; x++)
 			{
 				if(xmlobject.mxGraphModel.root[rel_lists[x]] !== undefined)

@@ -130,7 +130,7 @@ export default {
             for(let i = 0; i < model_selections.length; i++)
             {
                 if(model_selections[i].name === this.currentmodelname)
-                    return model_selections[i].selections_name.toString();
+                    return model_selections[i].selections_name;
             }
             return '';
         }

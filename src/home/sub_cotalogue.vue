@@ -25,19 +25,12 @@
 							</i>
 							<i v-if="item.data.type === 'feature'">
 							</i>
-							<span class="name"
+							<label class="name"
 								:title="item.data.nodeName"
-								:style="{display:item.data.nodeType===2?'initial':'inline-block',
+								:style="{display:'inline-block',
 										userSelect: 'none'}">
-								<div v-if="checkmandatorycircle($index)">
-									<input type="checkbox" v-model="item.data.tick" @change="itemclick($index)" disabled/>
-										{{item.data.nodeName}}
-								</div>
-								<div v-if="!checkmandatorycircle($index)">
-									<input type="checkbox" v-model="item.data.tick" @change="itemclick($index)" />
-										{{item.data.nodeName}}
-								</div>
-							</span>
+								{{item.data.nodeName}}
+							</label>
 							<i v-if="item.data.mandatory !== 'true'"
 								class="far fa-circle" aria-hidden="true"
 								style="color:gray;font-size: 16px;padding-left:4px">
@@ -46,6 +39,14 @@
 								class="fas fa-circle" aria-hidden="true"
 								style="color:gray;font-size: 16px;padding-left:4px">
 							</i>
+							<div class="form-check form-check-inline" style="float:right">
+								<input class="form-check-input" @click="item.data.tick = false;itemclick($index);" type="radio" :name="'inlineRadioOptions' + item.data.nodeId" id="inlineRadio2" :checked="!item.data.tick" :disabled="checkmandatorycircle($index)">
+								<label class="form-check-label" for="inlineRadio2"><i class="fas fa-times" style="color:red"></i></label>
+							</div>
+							<div class="form-check form-check-inline" style="float:right">
+								<input class="form-check-input" @click="item.data.tick = true;itemclick($index);" type="radio" :name="'inlineRadioOptions' + item.data.nodeId" id="inlineRadio1" :checked="item.data.tick" :disabled="checkmandatorycircle($index)">
+								<label class="form-check-label" for="inlineRadio1"><i class="fas fa-check" style="color:green"></i></label>
+							</div>
 						</span>
 					</a>
 				</li>

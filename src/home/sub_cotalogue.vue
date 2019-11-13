@@ -1,5 +1,9 @@
 <template>
 	<div>
+		<div>
+            <label >Please Upload your Feature Model </label>
+            <input id="fileInput" type="file" @change="processFile($event)">
+        </div>
 	<div class="naza-tree-warp">
 		<div class="naza-tree-inner show-wrap">
 			<ul class="naza-tree">
@@ -54,11 +58,15 @@
 			</ul>
 		</div>
 	</div>
+		<div v-if="xml !== ''">
+			<button @click="saveclosetree()">Save and close</button>
+		</div>
 	</div>
 </template>
 <script>
 /* eslint-disable */
 import Bus from '../_helpers/bus.js'
+import xml2json from '../_helpers/xml2json.js'
 import { mapState, mapActions } from 'vuex'
 export default {
 	data () {
@@ -579,6 +587,8 @@ export default {
 			let counter = 0;
 			this.checkclick(index);
 			this.checkconstraints(index);
+		},
+		saveclosetree(){
 			let selected_list = [];
 			let selected_list_name = [];
 			let disselected_list = [];
@@ -601,6 +611,11 @@ export default {
 			let thisdata = this.data;
 			this.addselections({id ,selected_list, selected_list_name, name});
 			this.adddisselections({id ,disselected_list, disselected_list_name, name});
+			this.xml = '';
+			this.data = [];
+			let input = document.getElementById('fileInput');
+			input.type = 'text';
+    		input.type = 'file';
 		},
 		/**
 		 * the rule of selections for checkbox
@@ -621,6 +636,7 @@ export default {
 							if(this.data[j].data.parentId === this.data[index].data.parentId && j !== index)
 							{
 								this.data[j].data.tick = false;
+								this.data[j].data.default_tick = true;
 							}
 						}
 					}
@@ -676,6 +692,7 @@ export default {
 							if(this.data[i].data.nodeId === temp_parentid)
 							{
 								this.data[i].data.tick = false;
+								this.data[i].data.default_tick = true;
 								temp_parentid = this.data[i].data.parentId;
 							}
 						}
@@ -696,6 +713,7 @@ export default {
 				if(this.data[index].data.tick === false)
 				{
 					this.data[i].data.tick = false;
+					this.data[i].data.default_tick = true;
 					continue;
 				}
 				// if it is selected, select all the following mandatory children
@@ -757,6 +775,7 @@ export default {
 											if(xmlobject.mxGraphModel.root[rel_lists[x]][i].mxCell['@target'] === this.data[k].data.nodeId)
 											{
 												this.data[k].data.tick = this.data[index].data.tick;
+												this.data[k].data.default_tick = true;
 												this.checkclick(k);
 												checkindex = k;
 											}
@@ -771,6 +790,7 @@ export default {
 											if(xmlobject.mxGraphModel.root[rel_lists[x]][i].mxCell['@target'] === this.data[k].data.nodeId && this.data[index].data.tick)
 											{	
 												this.data[k].data.tick = !this.data[index].data.tick;
+												this.data[k].data.default_tick = true;
 												this.checkclick(k);
 												checkindex = k;
 											}
@@ -790,6 +810,7 @@ export default {
 											if(xmlobject.mxGraphModel.root[rel_lists[x]][i].mxCell['@source'] === this.data[k].data.nodeId && this.data[index].data.tick)
 											{
 												this.data[k].data.tick = !this.data[index].data.tick;
+												this.data[k].data.default_tick = true;
 												this.checkclick(k);
 												checkindex = k;
 											}	
@@ -803,6 +824,7 @@ export default {
 											if(xmlobject.mxGraphModel.root[rel_lists[x]][i].mxCell['@source'] === this.data[k].data.nodeId && !this.data[index].data.tick)
 											{
 												this.data[k].data.tick = this.data[index].data.tick;
+												this.data[k].data.default_tick = true;
 												this.checkclick(k);
 												checkindex = k;
 											}	
@@ -829,6 +851,7 @@ export default {
 										if(xmlobject.mxGraphModel.root[rel_lists[x]].mxCell['@target'] === this.data[k].data.nodeId)
 										{
 											this.data[k].data.tick = this.data[index].data.tick;
+											this.data[k].data.default_tick = true;
 											this.checkclick(k);
 											checkindex = k;
 										}	
@@ -843,6 +866,7 @@ export default {
 										if(xmlobject.mxGraphModel.root[rel_lists[x]].mxCell['@target'] === this.data[k].data.nodeId && this.data[index].data.tick)
 										{
 											this.data[k].data.tick = !this.data[index].data.tick;
+											this.data[k].data.default_tick = true;
 											this.checkclick(k);
 											checkindex = k;
 										}	
@@ -862,6 +886,7 @@ export default {
 										if(xmlobject.mxGraphModel.root[rel_lists[x]].mxCell['@source'] === this.data[k].data.nodeId && this.data[index].data.tick)
 										{
 											this.data[k].data.tick = !this.data[index].data.tick;
+											this.data[k].data.default_tick = true;
 											this.checkclick(k);
 											checkindex = k;
 										}	
@@ -875,6 +900,7 @@ export default {
 										if(xmlobject.mxGraphModel.root[rel_lists[x]].mxCell['@source'] === this.data[k].data.nodeId && !this.data[index].data.tick)
 										{
 											this.data[k].data.tick = this.data[index].data.tick;
+											this.data[k].data.default_tick = true;
 											this.checkclick(k);
 											checkindex = k;
 										}	
@@ -1021,7 +1047,21 @@ export default {
 				}
 			}
 			return false;
-		}
+		},
+		processFile(event) {
+			this.initlevel = 0;
+			var xmlDoc = '';
+			var file = event.target.files[0];
+			var reader = new FileReader();
+			let name = event.target.files[0].name;
+			reader.onload = function(event) {
+				//console.log(event.target.result);
+				xmlDoc = (new DOMParser()).parseFromString(event.target.result,"text/xml");
+				var xmlobject = JSON.parse(xml2json(xmlDoc,''));
+				Bus.$emit('getxml',{name,xmlobject});
+			};
+			reader.readAsText(file);
+    	}
 	}
 }
 </script>

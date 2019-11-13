@@ -35,10 +35,6 @@
                 </tr>
             </tbody>
         </table>
-        <div>
-            <label >Please Upload your Feature Model </label>
-            <input type="file" @change="processFile($event)">
-        </div>
         <subcotalogue></subcotalogue>
         <p>
             <router-link to="/login">Logout</router-link>
@@ -47,8 +43,6 @@
 </template>
 
 <script>
-import Bus from '../_helpers/bus.js'
-import xml2json from '../_helpers/xml2json.js'
 import { mapState} from 'vuex'
 import subcotalogue from './sub_cotalogue.vue'
 
@@ -60,22 +54,6 @@ export default {
         ...mapState({
             account: state => state.account
         })
-    },
-    methods: {
-        processFile(event) {
-            this.initlevel = 0;
-            var xmlDoc = '';
-            var file = event.target.files[0];
-            var reader = new FileReader();
-            let name = event.target.files[0].name;
-            reader.onload = function(event) {
-                //console.log(event.target.result);
-                xmlDoc = (new DOMParser()).parseFromString(event.target.result,"text/xml");
-                var xmlobject = JSON.parse(xml2json(xmlDoc,''));
-                Bus.$emit('getxml',{name,xmlobject});
-            };
-            reader.readAsText(file);
-        }
     }
 };
 </script>

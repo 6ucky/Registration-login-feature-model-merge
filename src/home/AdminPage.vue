@@ -51,7 +51,7 @@
                                     <th scope="col">Status</th>
                                     <th scope="col">Role</th>
                                     <th scope="col">Selections</th>
-                                    <th scope="col">Disselections</th>
+                                    <th scope="col">Propagations</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -103,7 +103,7 @@
 </template>
 
 <script>
-import axios from "axios";
+// import axios from "axios";
 import { mapState, mapActions } from 'vuex'
 
 export default {
@@ -195,6 +195,19 @@ export default {
                         this.conflict_results.push(this.getxorconflicts(data,data[i].data.nodeId,select_list));
                 }
             }
+            this.getconstraintconflicts(xmlobject, data, select_list, unselect_list);
+            
+            let MCS = [];
+            if(this.conflict_results.length !== 0)
+                MCS = this.computeMCS();
+
+            if(MCS.length === 0)
+                alert('No MCS');
+            else
+                alert(JSON.stringify(MCS));
+        },
+        getconstraintconflicts(xmlobject, data, select_list, unselect_list)
+        {
             let rel_lists = ['rel_abstract_root','rel_abstract_abstract','rel_concrete_root','rel_concrete_abstract','rel_concrete_concrete'];
 			for(let x = 0; x < rel_lists.length; x++)
 			{
@@ -225,7 +238,7 @@ export default {
                                     {
                                         let requires = [];
                                         requires.push(source);
-                                        requires.push("! "+target);
+                                        requires.push("!"+target);
                                         this.conflict_results.push(requires);
                                     }
                                 }	
@@ -278,7 +291,7 @@ export default {
                                 {
                                     let requires = [];
                                     requires.push(source);
-                                    requires.push("! "+target);
+                                    requires.push("!"+target);
                                     this.conflict_results.push(requires);
                                 }
 							}	
@@ -309,12 +322,7 @@ export default {
 					}
                 }
             }
-            if(this.conflict_results.length === 0)
-                alert('No conflicts');
-            else
-                alert(JSON.stringify(this.conflict_results));
         },
-
         getxorconflicts(data, parentid, select_list)
         {
             let xorresults = [];
@@ -326,6 +334,93 @@ export default {
             if(xorresults.length < 2)
                 return null;
             return xorresults;
+        },
+        computeMCS(){
+            let cache = [];
+            let MCS = [];
+            for(let i = 0 ; i < this.conflict_results.length; i++)
+            {
+                for(let j = 0; j < this.conflict_results[i].length; j++)
+                {
+                    if(this.conflict_results[i][j].charAt(0) === '!')
+                    {
+                        if(!cache.includes(this.conflict_results[i][j].substring(1)))
+                            cache.push(this.conflict_results[i][j].substring(1));
+                        this.conflict_results[i][j] = this.conflict_results[i][j].substring(1);
+                    }
+                    else
+                    {
+                        if(!cache.includes(this.conflict_results[i][j]))
+                            cache.push(this.conflict_results[i][j]);
+                        this.conflict_results[i][j] = '!' + this.conflict_results[i][j];
+                    }
+                }
+            }
+            for(let i = 0 ; i < cache.length; i++)
+            {
+                let temp = MCS;
+                if(temp.length === 0)
+                {
+                    let temp1 = [];
+                    let temp2 = [];
+                    if(cache[i].charAt(0) === '!')
+                    {
+                        temp1.push(cache[i].substring(1));
+                        temp2.push(cache[i]);
+                    }
+                    else
+                    {
+                        temp1.push(cache[i]);
+                        temp2.push('!'+cache[i]);
+                    }
+                    MCS.push(temp1);
+                    MCS.push(temp2);
+                }
+                else
+                {
+                    MCS = [];
+                    for(let j = 0; j < temp.length; j++)
+                    {
+                        let tempj = temp[j];
+                        let temp1 = [...tempj];
+                        let temp2 = [...tempj];
+                        if(cache[i].charAt(0) === '!')
+                        {
+                            temp1.push(cache[i].substring(1));
+                            temp2.push(cache[i]);
+                        }
+                        else
+                        {
+                            temp1.push(cache[i]);
+                            temp2.push('!'+cache[i]);
+                        }
+                        if(temp1.length !== 0)
+                            MCS.push(temp1);
+                        if(temp2.length !== 0)
+                            MCS.push(temp2);
+                    }
+                }
+            }
+            let delete_num = [];
+            for(let i = 0; i < MCS.length; i++)
+            {
+                for(let j = 0; j < this.conflict_results.length; j++)
+                {
+                    let num = this.conflict_results[j].length;
+                    for(let k = 0 ; k < this.conflict_results[j].length; k++)
+                    {
+                        if(MCS[i].includes(this.conflict_results[j][k]))
+                            num--;
+                    }
+                    if(num === 0 && !delete_num.includes(i))
+                        delete_num.unshift(i);
+                }
+            }
+            for(let i = 0; i < delete_num.length; i++)
+            {
+                MCS.splice(delete_num[i],1);
+            }
+            return MCS;
         }
     }
 };

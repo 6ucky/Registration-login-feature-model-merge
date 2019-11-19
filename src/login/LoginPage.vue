@@ -1,11 +1,11 @@
 <template>
     <div>
-        <h2>Login</h2>
+        <h2>Stakeholder Login</h2>
         <form @submit.prevent="handleSubmit">
             <div class="form-group">
-                <label for="username">Username</label>
+                <label for="username">Loginname</label>
                 <input type="text" v-model="username" name="username" class="form-control" :class="{ 'is-invalid': submitted && !username }" />
-                <div v-show="submitted && !username" class="invalid-feedback">Username is required</div>
+                <div v-show="submitted && !username" class="invalid-feedback">Stakeholdername is required</div>
             </div>
             <div class="form-group">
                 <label htmlFor="password">Password</label>

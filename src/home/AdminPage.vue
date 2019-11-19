@@ -1,7 +1,7 @@
 <template>
     <div>
-        <h3>Users from secure api end point:</h3>
-        <em v-if="users.loading">Loading users...</em>
+        <h3>Stakeholders from secure api end point:</h3>
+        <em v-if="users.loading">Loading stakeholders...</em>
         <span v-if="users.error" class="text-danger">ERROR: {{users.error}}</span>
         <ul v-if="users.items">
             <li v-for="user in users.items" :key="user.id">
@@ -22,7 +22,7 @@
                 <span v-else-if="model.deleteError" class="text-danger"> - ERROR: {{model.deleteError}}</span>
                 <span v-else> 
                     -
-                    <a @click="currentmodelname = model.modelname" class="text-danger" data-toggle="modal" data-target="#mergeModal">Merge</a>
+                    <a @click="currentmodelname = model.modelname;updatecurrentuser();" class="text-danger" data-toggle="modal" data-target="#mergeModal">Merge</a>
                     - 
                     <a @click="deleteModel(model.id)" class="text-danger">Delete</a>
                 </span>
@@ -32,7 +32,7 @@
             <div class="modal-dialog modal-lg" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="mergeModalTitle">Modal title</h5>
+                        <h5 class="modal-title" id="mergeModalTitle">List of stakeholders</h5>
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
                         </button>
@@ -55,7 +55,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr v-for="user in users.items" :key="user.id">
+                                <tr v-for="user in currentuser" :key="user.id">
                                     <td>
                                         {{user.firstName}}
                                     </td>
@@ -91,6 +91,29 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#criticaluserModal">Choose critical stakeholder</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal fade" id="criticaluserModal" tabindex="-1" role="dialog" aria-labelledby="criticaluserModalTitle" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="mergeModalTitle">Critical stakeholder</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <select v-model="critical_user" >
+                            <option disabled value="">Select</option>
+                            <option v-for="user in currentuser" :key="user.id">
+                                {{user.firstName}} {{user.lastName}}
+                            </option>
+                        </select>
+                    </div>
+                    <div class="modal-footer">
                         <button type="button" class="btn btn-primary" @click="startmerge()">Start merge</button>
                     </div>
                 </div>
@@ -109,8 +132,10 @@ import { mapState, mapActions } from 'vuex'
 export default {
     data (){
         return{
+            critical_user:'',
             currentmodelname:'',
-            conflict_results:[]
+            conflict_results:[],
+            currentuser:{}
         }
     },
     computed: {
@@ -124,6 +149,17 @@ export default {
         this.getAllModels();
     },
     methods: {
+        updatecurrentuser(){
+            let temp = {...this.users.items};
+            for(let key in temp)
+            {
+                if(this.getselections(temp[key].model_selections) === '')
+                    delete temp[key];
+                else if(this.getdisselections(temp[key].model_selections) === '')
+                    delete temp[key];
+            }
+            this.currentuser = {...temp};
+        },
         ...mapActions('users', {
             getAllUsers: 'getAll',
             deleteUser: 'delete'
@@ -155,6 +191,11 @@ export default {
             return '';
         },
         startmerge(){
+            if(this.critical_user === '')
+            {
+                alert('Please select one critical stakeholder!');
+                return;
+            }
             this.conflict_results = [];
             let select_list = [];
             let unselect_list = [];
@@ -200,11 +241,11 @@ export default {
             let MCS = [];
             if(this.conflict_results.length !== 0)
                 MCS = this.computeMCS();
-
             if(MCS.length === 0)
                 alert('No MCS');
             else
                 alert(JSON.stringify(MCS));
+            $('#criticaluserModal').modal('toggle');
         },
         getconstraintconflicts(xmlobject, data, select_list, unselect_list)
         {

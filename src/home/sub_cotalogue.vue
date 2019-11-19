@@ -102,10 +102,15 @@ export default {
 								this.data[j].data.tick = true;
 								this.data[j].data.default_tick = true;
 							}
-							if(this.account.user.model_selections[i].disselections.includes(this.data[j].data.nodeId))
+							else if(this.account.user.model_selections[i].disselections.includes(this.data[j].data.nodeId))
 							{
 								this.data[j].data.tick = false;
 								this.data[j].data.default_tick = true;
+							}
+							else
+							{
+								this.data[j].data.tick = false;
+								this.data[j].data.default_tick = false;
 							}
 						}
 					}

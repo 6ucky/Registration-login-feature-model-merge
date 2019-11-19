@@ -1,6 +1,6 @@
 <template>
     <div>
-        <h2>Register</h2>
+        <h2>Stakeholder Register</h2>
         <form @submit.prevent="handleSubmit">
             <div class="form-group">
                 <label for="firstName">First Name</label>
@@ -13,9 +13,9 @@
                 <div v-if="submitted && errors.has('lastName')" class="invalid-feedback">{{ errors.first('lastName') }}</div>
             </div>
             <div class="form-group">
-                <label for="username">Username</label>
-                <input type="text" v-model="user.username" v-validate="'required'" name="username" class="form-control" :class="{ 'is-invalid': submitted && errors.has('username') }" />
-                <div v-if="submitted && errors.has('username')" class="invalid-feedback">{{ errors.first('username') }}</div>
+                <label for="username">Loginname</label>
+                <input type="text" v-model="user.username" v-validate="'required'" name="loginname" class="form-control" :class="{ 'is-invalid': submitted && errors.has('loginname') }" />
+                <div v-if="submitted && errors.has('loginname')" class="invalid-feedback">{{ errors.first('loginname') }}</div>
             </div>
             <div class="form-group">
                 <label htmlFor="password">Password</label>
@@ -24,15 +24,16 @@
             </div>
             <div class="form-group">
                  <span>Status:</span>
-                <select v-model="user.status">
+                <select v-model="user.status" v-validate="'required'" name="status" class="form-control" :class="{ 'is-invalid': submitted && errors.has('status') }">
                     <option disabled value="">Select</option>
                     <option>Expert</option>
                     <option>Novice</option>
                 </select>
+                <div v-if="submitted && errors.has('status')" class="invalid-feedback">{{ errors.first('status') }}</div>
             </div>
             <div class="form-group">
                 <span>Role:</span>
-                <select v-model="user.role">
+                <select v-model="user.role" v-validate="'required'" name="role" class="form-control" :class="{ 'is-invalid': submitted && errors.has('role') }">
                     <option disabled value="">Select</option>
                     <option>Engineer</option>
                     <option>Product Manager</option>
@@ -40,6 +41,7 @@
                     <option>Customer</option>
                     <option>User</option>
                 </select>
+                <div v-if="submitted && errors.has('role')" class="invalid-feedback">{{ errors.first('role') }}</div>
             </div>
             <div class="form-group">
                 <label for="regle">Substitution rules :</label> <br/>

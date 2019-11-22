@@ -206,6 +206,31 @@ export function configureFakeBackend() {
                     return;
                 }
 
+                // update the user personal information
+                if (url.endsWith('/users/updateinfo') && opts.method === 'POST') {
+                    let newuser = JSON.parse(opts.body);
+
+                    for(let i = 0; i < users.length; i++)
+                    {
+                        if(users[i].id === newuser.user.id)
+                        {
+                            users[i].MCS.r1 = newuser.r1;
+                            users[i].MCS.r2 = newuser.r2;
+                            users[i].MCS.r3 = newuser.r3;
+                            users[i].MCS.r4 = newuser.r4;
+                            users[i].MCS.r5 = newuser.r5;
+                            users[i].status = newuser.status;
+                            users[i].role = newuser.role;
+                        }
+                    }
+                    localStorage.setItem('users', JSON.stringify(users));
+                    
+                    // respond 200 OK
+                    resolve({ ok: true, text: () => Promise.resolve() });
+
+                    return;
+                }
+
                 // get users
                 if (url.endsWith('/users') && opts.method === 'GET') {
                     // check for fake auth token in header and return users if valid, this security is implemented server side in a real application

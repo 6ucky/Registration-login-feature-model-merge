@@ -106,15 +106,20 @@
                         </button>
                     </div>
                     <div class="modal-body">
-                        <select v-model="critical_user" >
-                            <option disabled value="">Select</option>
-                            <option v-for="user in currentuser" :key="user.id">
-                                {{user.firstName}} {{user.lastName}}
-                            </option>
-                        </select>
+                        <div class="form-group">
+                            <select v-model="critical_user" >
+                                <option disabled value="">Select</option>
+                                <option v-for="user in currentuser" :key="user.id">
+                                    {{user.firstName}} {{user.lastName}}
+                                </option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <input type="checkbox" v-model="applytoallusers"/>Apply the final solution to all the users <br/>
+                        </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-primary" @click="startmerge()">Start merge</button>
+                        <button type="button" class="btn btn-primary" @click="startmerge();applytoallusers=false;">Start merge</button>
                     </div>
                 </div>
             </div>
@@ -135,7 +140,8 @@ export default {
             critical_user:'',
             currentmodelname:'',
             conflict_results:[],
-            currentuser:{}
+            currentuser:{},
+            applytoallusers: false
         }
     },
     computed: {
@@ -160,6 +166,7 @@ export default {
             }
             this.currentuser = {...temp};
         },
+        ...mapActions('model', ['addselections', 'adddisselections']),
         ...mapActions('users', {
             getAllUsers: 'getAll',
             deleteUser: 'delete'
@@ -191,6 +198,7 @@ export default {
             return '';
         },
         startmerge(){
+            console.log(this.applytoallusers);
             if(this.critical_user === '')
             {
                 alert('Please select one critical stakeholder!');
@@ -238,9 +246,111 @@ export default {
             }
             this.getconstraintconflicts(xmlobject, data, select_list, unselect_list);
             
+            //get MCS
             let MCS = [];
             if(this.conflict_results.length !== 0)
                 MCS = this.computeMCS();
+            //choose one solution
+            if(MCS.length !== 0)
+            {
+                let allusers = this.currentuser;
+                let r1 = false;
+                let r2 = false;
+                let r3 = false;
+                let r4 = false;
+                let r5 = false;
+                let results = [];
+                for(let key in allusers)
+                {
+                    if(allusers[key].MCS.r1)
+                        r1 = true;
+                    if(allusers[key].MCS.r2)
+                        r2 = true;
+                    if(allusers[key].MCS.r3)
+                        r3 = true;
+                    if(allusers[key].MCS.r4)
+                        r4 = true;
+                    if(allusers[key].MCS.r5)
+                        r5 = true;
+                }
+                if(r1)
+                    this.$set(results, this.getsolution1(MCS));
+                if(r2)
+                    this.$set(results, this.getsolution2(MCS));
+                // if(r3)
+                //     this.$set(results, this.getsolution3(MCS));
+                // if(r4)
+                //     this.$set(results, this.getsolution4(MCS));
+                // if(r5)
+                //     this.$set(results, this.getsolution5(MCS));
+                console.log(Object.keys(results));
+                if(Object.keys(results).length === 1)
+                {
+                    let solutions = [];
+                    solutions.push(JSON.stringify(Object.keys(results)).split(',')[0].split('["')[1]);
+                    for(let i = 1; i < JSON.stringify(Object.keys(results)).split(',').length-1; i++)
+                    {
+                        solutions.push(JSON.stringify(Object.keys(results)).split(',')[i]);
+                    }
+                    solutions.push(JSON.stringify(Object.keys(results)).split(',')[JSON.stringify(Object.keys(results)).split(',').length-1].split('"]')[0]);
+                    let delete_select = [];
+                    let delete_disselect = [];
+                    for(let i = 0 ; i < solutions.length; i++)
+                    {
+                        if(solutions[i].indexOf('!') !== -1)
+                        {
+                            for(let j = 0; j < unselect_list.length; j++)
+                            {
+                                if(solutions[i] === '!' + unselect_list[j])
+                                    delete_disselect.push(j);
+                            }
+                            if(!select_list.includes(solutions[i].substring(1)))
+                                select_list.push(solutions[i].substring(1));
+                        }
+                        else
+                        {
+                            for(let j = 0; j < select_list.length; j++)
+                            {
+                                if(solutions[i] === select_list[j])
+                                {
+                                    delete_select.push(j);
+                                }
+                            }
+                            if(!unselect_list.includes(solutions[i]))
+                                unselect_list.push(solutions[i]);
+                        }
+                    }
+                    for(let i = 0; i < delete_select.length; i++)
+                    {
+                        select_list.splice(delete_select[i], 1);
+                    }
+                    for(let i = 0; i < delete_disselect.length; i++)
+                    {
+                        unselect_list.splice(delete_disselect[i], 1);
+                    }
+                    console.log(select_list);
+                    console.log(unselect_list);
+                    if(this.applytoallusers)
+                        this.updateallusersolution(select_list,unselect_list);
+                }
+                else
+                {
+                    let critical_selections = [];
+                    let critical_disselections = [];
+                    for(let key in allusers)
+                    {
+                        if(this.critical_user === allusers[key].firstName + ' ' + allusers[key].lastName)
+                        {
+                            critical_selections = this.getselections(allusers[key].model_selections);
+                            critical_disselections = this.getdisselections(allusers[key].model_selections);
+                        }
+                    }
+                    console.log(critical_selections);
+                    console.log(critical_disselections);
+                    if(this.applytoallusers)
+                        this.updateallusersolution(critical_selections,critical_disselections);
+                }
+            }
             if(MCS.length === 0)
                 alert('No MCS');
             else
@@ -462,6 +572,87 @@ export default {
                 MCS.splice(delete_num[i],1);
             }
             return MCS;
+        },
+        getsolution1(MCS){
+            let index = '';
+            let maxlength = 0;
+            for(let i = 0; i < MCS.length; i++)
+            {
+                let currentlength = 0;
+                for(let j = 0; j < MCS[i].length; j++)
+                {
+                    if(MCS[i][j].indexOf('!') === -1)
+                    {
+                        currentlength++;
+                    }
+                }
+                if(currentlength > maxlength)
+                {
+                    maxlength = currentlength;
+                    index = i;
+                }
+            }
+            return MCS[index];
+        },
+        getsolution2(MCS){
+            let index = '';
+            let maxlength = 0;
+            for(let i = 0; i < MCS.length; i++)
+            {
+                let currentlength = 0;
+                for(let j = 0; j < MCS[i].length; j++)
+                {
+                    if(MCS[i][j].indexOf('!') !== -1)
+                    {
+                        currentlength++;
+                    }
+                }
+                if(currentlength > maxlength)
+                {
+                    maxlength = currentlength;
+                    index = i;
+                }
+            }
+            return MCS[index];
+        },
+        getsolution3(MCS){
+
+        },
+        getsolution4(MCS){
+
+        },
+        getsolution5(MCS){
+
+        },
+        // return the final solutions to all the users
+        updateallusersolution(selections, disselections){
+            let data = [];
+            for(let i = 0; i < this.models.items.length; i++)
+            {
+                if(this.models.items[i].modelname === this.currentmodelname)
+                {
+                    data = this.models.items[i].data;
+                }
+            }
+
+            let selected_list = [];
+            let disselected_list = [];
+            for(let i = 0; i < data.length; i++)
+            {  
+                if(selections.includes(data[i].data.nodeName))
+                    selected_list.push(data[i].data.nodeId);
+                if(disselections.includes(data[i].data.nodeName))
+                    disselected_list.push(data[i].data.nodeId);
+            }   
+
+            let allusers = this.currentuser;
+            let name = this.currentmodelname;
+            for(let key in allusers)
+            {
+                let id = allusers[key].id;
+                this.addselections({id ,selected_list, selections, name});
+                this.adddisselections({id ,disselected_list, disselections, name});
+            }
         }
     }
 };

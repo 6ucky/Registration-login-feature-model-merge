@@ -14,7 +14,8 @@ export const userService = {
     adddisselections,
     getAllmodels,
     deletemodels:_deletemodels,
-    usernewmodel
+    usernewmodel,
+    updatepersonalinfo
 };
 
 function login(username, password) {
@@ -90,6 +91,16 @@ function adddisselections(id, disselected_list, disselected_list_name, modelname
     };
 
     return fetch(`${config.apiUrl}/models/adddisselections`, requestOptions).then(handleResponse);
+}
+
+function updatepersonalinfo(r1,r2,r3,r4,r5,status,role,user) {
+    const requestOptions = {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({r1,r2,r3,r4,r5,status,role,user})
+    };
+
+    return fetch(`${config.apiUrl}/users/updateinfo`, requestOptions).then(handleResponse);
 }
 
 function getAll() {

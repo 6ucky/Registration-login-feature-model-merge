@@ -48,17 +48,17 @@ const actions = {
                 }
             );
     },
-    updatepersonalinfo({ dispatch, commit }, {r1,r2,r3,r4,r5,status,role})
+    updatepersonalinfo({ dispatch, commit }, {r1,r2,r3,r4,r5,status,role, id})
     {
-        userService.updatepersonalinfo(r1,r2,r3,r4,r5,status,role,user);
-        user.r1 = r1;
-        user.r2 = r2;
-        user.r3 = r3;
-        user.r4 = r4;
-        user.r5 = r5;
-        user.status = status;
-        user.role = role;
-        localStorage.setItem('user', JSON.stringify(user));
+        userService.updatepersonalinfo(r1,r2,r3,r4,r5,status,role, id).then(
+            user => {
+                commit('loginSuccess', user);
+            },
+            error => {
+                commit('loginFailure', error);
+                dispatch('alert/error', error, { root: true });
+            }
+        );
     }
 };
 

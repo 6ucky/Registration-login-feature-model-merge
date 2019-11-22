@@ -351,6 +351,7 @@ export default {
                         this.updateallusersolution(critical_selections,critical_disselections);
                 }
             }
+            console.log(this.conflict_results);
             if(MCS.length === 0)
                 alert('No MCS');
             else

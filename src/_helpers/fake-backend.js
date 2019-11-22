@@ -209,10 +209,11 @@ export function configureFakeBackend() {
                 // update the user personal information
                 if (url.endsWith('/users/updateinfo') && opts.method === 'POST') {
                     let newuser = JSON.parse(opts.body);
+                    let responseJson = {};
 
                     for(let i = 0; i < users.length; i++)
                     {
-                        if(users[i].id === newuser.user.id)
+                        if(users[i].id === newuser.id)
                         {
                             users[i].MCS.r1 = newuser.r1;
                             users[i].MCS.r2 = newuser.r2;
@@ -221,12 +222,25 @@ export function configureFakeBackend() {
                             users[i].MCS.r5 = newuser.r5;
                             users[i].status = newuser.status;
                             users[i].role = newuser.role;
+                            responseJson = {
+                                id: newuser.id,
+                                username: users[i].username,
+                                firstName: users[i].firstName,
+                                lastName: users[i].lastName,
+                                r1: newuser.r1,
+                                r2: newuser.r2,
+                                r3: newuser.r3,
+                                r4: newuser.r4,
+                                r5: newuser.r5,
+                                model_selections: users[i].model_selections,
+                                status: newuser.status,
+                                role: newuser.role,
+                                token: 'fake-jwt-token'
+                            };
                         }
                     }
                     localStorage.setItem('users', JSON.stringify(users));
-                    
-                    // respond 200 OK
-                    resolve({ ok: true, text: () => Promise.resolve() });
+                    resolve({ ok: true, text: () => Promise.resolve(JSON.stringify(responseJson)) });
 
                     return;
                 }

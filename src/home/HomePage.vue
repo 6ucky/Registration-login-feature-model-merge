@@ -126,8 +126,9 @@ export default {
             this.role = this.account.user.role;
         },
         updateuser(){
+            let id = this.account.user.id;
             const {r1,r2,r3,r4,r5,status,role,user} = this;
-            this.updatepersonalinfo({r1,r2,r3,r4,r5,status,role,user})
+            this.updatepersonalinfo({r1,r2,r3,r4,r5,status,role,user, id})
         }
     }
 };

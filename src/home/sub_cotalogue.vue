@@ -20,9 +20,7 @@
 							:style="{position: 'absolute',left: (20 * item.data.level - 17) + 'px',top: '6px'}">
 						</i>
 						<span class="name-container"
-							:class="'vue-contextmenuName-menu' + item.data.nodeType + item.data.nodeId"
-							@dblclick="dblClick($index)"
-							@contextmenu="showMenu($index,$event)">
+							@dblclick="dblClick($index)">
 							<i v-if="item.data.type === 'and'"
 								class="fa fa-plus" aria-hidden="true"
 								style="color:gray;font-size: 16px;padding-right:4px">
@@ -931,7 +929,7 @@ export default {
 		 */
 		checkadditionalconstraint(root, index, c_index, modeltype)
 		{
-			let rel_lists = ['rel_abstract_root','rel_abstract_abstract','rel_concrete_root','rel_concrete_abstract'];
+			let rel_lists = ['rel_abstract_root','rel_abstract_abstract','rel_concrete_root','rel_concrete_abstract','rel_concrete_concrete'];
 			for(let x = 0; x < rel_lists.length; x++)
 			{
 				if(root[rel_lists[x]] !== undefined)

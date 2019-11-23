@@ -775,7 +775,7 @@ export default {
 										for(let k = 0; k < this.data.length; k++)
 										{
 											// requires conforms to both select and disselect
-											if(xmlobject.mxGraphModel.root[rel_lists[x]][i].mxCell['@target'] === this.data[k].data.nodeId)
+											if(xmlobject.mxGraphModel.root[rel_lists[x]][i].mxCell['@target'] === this.data[k].data.nodeId  && this.data[index].data.tick)
 											{
 												this.data[k].data.tick = this.data[index].data.tick;
 												this.data[k].data.default_tick = true;
@@ -819,20 +819,20 @@ export default {
 											}	
 										}
 									}
-									else if(xmlobject.mxGraphModel.root[rel_lists[x]][i]['@relType'] === 'requires')
-									{
-										for(let k = 0; k < this.data.length; k++)
-										{
-											//requires conforms to only disselect
-											if(xmlobject.mxGraphModel.root[rel_lists[x]][i].mxCell['@source'] === this.data[k].data.nodeId && !this.data[index].data.tick)
-											{
-												this.data[k].data.tick = this.data[index].data.tick;
-												this.data[k].data.default_tick = true;
-												this.checkclick(k);
-												checkindex = k;
-											}	
-										}
-									}
+									// else if(xmlobject.mxGraphModel.root[rel_lists[x]][i]['@relType'] === 'requires')
+									// {
+									// 	for(let k = 0; k < this.data.length; k++)
+									// 	{
+									// 		//requires conforms to only disselect
+									// 		if(xmlobject.mxGraphModel.root[rel_lists[x]][i].mxCell['@source'] === this.data[k].data.nodeId && !this.data[index].data.tick)
+									// 		{
+									// 			this.data[k].data.tick = this.data[index].data.tick;
+									// 			this.data[k].data.default_tick = true;
+									// 			this.checkclick(k);
+									// 			checkindex = k;
+									// 		}	
+									// 	}
+									// }
 								}
 							}
 						}
@@ -851,7 +851,7 @@ export default {
 									for(let k = 0; k < this.data.length; k++)
 									{
 										// requires conforms to both select and disselect
-										if(xmlobject.mxGraphModel.root[rel_lists[x]].mxCell['@target'] === this.data[k].data.nodeId)
+										if(xmlobject.mxGraphModel.root[rel_lists[x]].mxCell['@target'] === this.data[k].data.nodeId && this.data[index].data.tick)
 										{
 											this.data[k].data.tick = this.data[index].data.tick;
 											this.data[k].data.default_tick = true;
@@ -895,20 +895,20 @@ export default {
 										}	
 									}
 								}
-								else if(xmlobject.mxGraphModel.root[rel_lists[x]]['@relType'] === 'requires')
-								{
-									for(let k = 0; k < this.data.length; k++)
-									{
-										//requires conforms to only disselect
-										if(xmlobject.mxGraphModel.root[rel_lists[x]].mxCell['@source'] === this.data[k].data.nodeId && !this.data[index].data.tick)
-										{
-											this.data[k].data.tick = this.data[index].data.tick;
-											this.data[k].data.default_tick = true;
-											this.checkclick(k);
-											checkindex = k;
-										}	
-									}
-								}
+								// else if(xmlobject.mxGraphModel.root[rel_lists[x]]['@relType'] === 'requires')
+								// {
+								// 	for(let k = 0; k < this.data.length; k++)
+								// 	{
+								// 		//requires conforms to only disselect
+								// 		if(xmlobject.mxGraphModel.root[rel_lists[x]].mxCell['@source'] === this.data[k].data.nodeId && !this.data[index].data.tick)
+								// 		{
+								// 			this.data[k].data.tick = this.data[index].data.tick;
+								// 			this.data[k].data.default_tick = true;
+								// 			this.checkclick(k);
+								// 			checkindex = k;
+								// 		}	
+								// 	}
+								// }
 							}
 						}
 					}
@@ -950,7 +950,7 @@ export default {
 										for(let k = 0; k < this.data.length; k++)
 										{
 											// requires conforms to both select and disselect
-											if(root[rel_lists[x]][i].mxCell['@target'] === this.data[k].data.nodeId && k !== index)
+											if(root[rel_lists[x]][i].mxCell['@target'] === this.data[k].data.nodeId && k !== index && this.data[c_index].data.tick)
 												return true;
 										}
 									}	
@@ -1006,7 +1006,7 @@ export default {
 									for(let k = 0; k < this.data.length; k++)
 									{
 										// requires conforms to both select and disselect
-										if(root[rel_lists[x]].mxCell['@target'] === this.data[k].data.nodeId && k !== index)
+										if(root[rel_lists[x]].mxCell['@target'] === this.data[k].data.nodeId && k !== index && this.data[c_index].data.tick)
 											return true;
 									}
 								}	

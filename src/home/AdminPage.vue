@@ -124,6 +124,7 @@
                 </div>
             </div>
         </div>
+        <subcotalogue ref="tree" style="display:none"></subcotalogue>
         <p>
             <router-link to="/login">Logout</router-link>
         </p>
@@ -133,6 +134,7 @@
 <script>
 // import axios from "axios";
 import { mapState, mapActions } from 'vuex'
+import subcotalogue from './sub_cotalogue.vue'
 
 export default {
     data (){
@@ -143,6 +145,9 @@ export default {
             currentuser:{},
             applytoallusers: false
         }
+    },
+    components:{
+        subcotalogue,
     },
     computed: {
         ...mapState({
@@ -198,7 +203,14 @@ export default {
             return '';
         },
         startmerge(){
-            console.log(this.applytoallusers);
+            let xmlobject = {};
+            for(let i = 0; i < this.models.items.length; i++)
+            {
+                if(this.models.items[i].modelname === this.currentmodelname)
+                {
+                    xmlobject = this.models.items[i].xml;
+                }
+            }
             if(this.critical_user === '')
             {
                 alert('Please select one critical stakeholder!');
@@ -226,25 +238,34 @@ export default {
                     }
                 }
             }
-            let data = [];
-            let xmlobject = {};
-            for(let i = 0; i < this.models.items.length; i++)
+
+            this.$refs.tree.xml = xmlobject;
+            this.$refs.tree.mainprocess();
+
+            for(let i = 0 ; i < this.$refs.tree.data.length; i++)
             {
-                if(this.models.items[i].modelname === this.currentmodelname)
+                if(unselect_list.includes(this.$refs.tree.data[i].data.nodeName))
                 {
-                    data = this.models.items[i].data;
-                    xmlobject = this.models.items[i].xml;
+                    this.$refs.tree.data[i].data.tick = false;
+                    this.$refs.tree.data[i].data.default_tick = true;
+                }
+                if(select_list.includes(this.$refs.tree.data[i].data.nodeName))
+                {
+                    this.$refs.tree.data[i].data.tick = true;
+                    this.$refs.tree.data[i].data.default_tick = true;
                 }
             }
-            for(let i = 0; i < data.length; i++)
+
+            for(let i = 0; i < this.$refs.tree.data.length; i++)
             {
-                if(data[i].data.type === 'alt')
+                if(this.$refs.tree.data[i].data.type === 'alt')
                 {
-                    if(this.getxorconflicts(data,data[i].data.nodeId,select_list) !== null)
-                        this.conflict_results.push(this.getxorconflicts(data,data[i].data.nodeId,select_list));
+                    if(this.getxorconflicts(this.$refs.tree.data, this.$refs.tree.data[i].data.nodeId,select_list) !== null)
+                        this.conflict_results.push(this.getxorconflicts(this.$refs.tree.data, this.$refs.tree.data[i].data.nodeId, select_list));
                 }
             }
-            this.getconstraintconflicts(xmlobject, data, select_list, unselect_list);
+            this.getconstraintconflicts(xmlobject, this.$refs.tree.data, select_list, unselect_list);
+            console.log(this.users);
             
             //get MCS
             let MCS = [];
@@ -293,45 +314,47 @@ export default {
                         solutions.push(JSON.stringify(Object.keys(results)).split(',')[i]);
                     }
                     solutions.push(JSON.stringify(Object.keys(results)).split(',')[JSON.stringify(Object.keys(results)).split(',').length-1].split('"]')[0]);
-                    let delete_select = [];
-                    let delete_disselect = [];
+                    
                     for(let i = 0 ; i < solutions.length; i++)
                     {
                         if(solutions[i].indexOf('!') !== -1)
                         {
-                            for(let j = 0; j < unselect_list.length; j++)
+                            for(let j = 0; j < this.$refs.tree.data.length; j++)
                             {
-                                if(solutions[i] === '!' + unselect_list[j])
-                                    delete_disselect.push(j);
+                                if(this.$refs.tree.data[j].data.nodeName === solutions[i].substring(1))
+                                {
+                                    this.$refs.tree.data[j].data.tick = true;
+                                    this.$refs.tree.data[j].data.default_tick = true;
+                                    this.$refs.tree.itemclick(j);
+                                }
                             }
-                            if(!select_list.includes(solutions[i].substring(1)))
-                                select_list.push(solutions[i].substring(1));
                         }
                         else
                         {
-                            for(let j = 0; j < select_list.length; j++)
+                            for(let j = 0; j < this.$refs.tree.data.length; j++)
                             {
-                                if(solutions[i] === select_list[j])
+                                if(this.$refs.tree.data[j].data.nodeName === solutions[i])
                                 {
-                                    delete_select.push(j);
+                                    this.$refs.tree.data[j].data.tick = false;
+                                    this.$refs.tree.data[j].data.default_tick = true;
+                                    this.$refs.tree.itemclick(j);
                                 }
                             }
-                            if(!unselect_list.includes(solutions[i]))
-                                unselect_list.push(solutions[i]);
                         }
                     }
-                    for(let i = 0; i < delete_select.length; i++)
+                    let final_select_list = [];
+                    let final_unselect_list = [];
+                    for(let i = 0; i < this.$refs.tree.data.length; i++)
                     {
-                        select_list.splice(delete_select[i], 1);
+                        if(this.$refs.tree.data[i].data.tick && this.$refs.tree.data[i].data.default_tick)
+                            final_select_list.push(this.$refs.tree.data[i].data.nodeName);
+                        if(!this.$refs.tree.data[i].data.tick && this.$refs.tree.data[i].data.default_tick)
+                            final_unselect_list.push(this.$refs.tree.data[i].data.nodeName);
                     }
-                    for(let i = 0; i < delete_disselect.length; i++)
-                    {
-                        unselect_list.splice(delete_disselect[i], 1);
-                    }
-                    console.log(select_list);
-                    console.log(unselect_list);
+                    console.log(final_select_list);
+                    console.log(final_unselect_list);
                     if(this.applytoallusers)
-                        this.updateallusersolution(select_list,unselect_list);
+                        this.updateallusersolution(final_select_list,final_unselect_list);
                 }
                 else
                 {
@@ -351,7 +374,8 @@ export default {
                         this.updateallusersolution(critical_selections,critical_disselections);
                 }
             }
-            console.log(this.conflict_results);
+            console.log(this.users);
+            this.$refs.tree.data = [];
             if(MCS.length === 0)
                 alert('No MCS');
             else
@@ -627,23 +651,14 @@ export default {
         },
         // return the final solutions to all the users
         updateallusersolution(selections, disselections){
-            let data = [];
-            for(let i = 0; i < this.models.items.length; i++)
-            {
-                if(this.models.items[i].modelname === this.currentmodelname)
-                {
-                    data = this.models.items[i].data;
-                }
-            }
-
             let selected_list = [];
             let disselected_list = [];
-            for(let i = 0; i < data.length; i++)
+            for(let i = 0; i < this.$refs.tree.data.length; i++)
             {  
-                if(selections.includes(data[i].data.nodeName))
-                    selected_list.push(data[i].data.nodeId);
-                if(disselections.includes(data[i].data.nodeName))
-                    disselected_list.push(data[i].data.nodeId);
+                if(selections.includes(this.$refs.tree.data[i].data.nodeName))
+                    selected_list.push(this.$refs.tree.data[i].data.nodeId);
+                if(disselections.includes(this.$refs.tree.data[i].data.nodeName))
+                    disselected_list.push(this.$refs.tree.data[i].data.nodeId);
             }   
 
             let allusers = this.currentuser;

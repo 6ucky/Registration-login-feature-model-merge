@@ -258,6 +258,38 @@ export function configureFakeBackend() {
                     return;
                 }
 
+                // apply updates to all users and get users
+                if (url.endsWith('/applyusers') && opts.method === 'GET') {
+                    let updates = JSON.parse(opts.body);
+                    for(let i = 0; i < users.length; i++)
+                    {
+                        if(updates.id.includes(users[i].id))
+                        {
+                            for(let j = 0; j < users[i].model_selections.length; j++)
+                            {
+                                if(users[i].model_selections[j].name === updates.name)
+                                {
+                                    users[i].model_selections[j].selections = updates.selected_list;
+                                    users[i].model_selections[j].selections_name = updates.selections;
+                                    users[i].model_selections[j].disselections = updates.disselected_list;
+                                    users[i].model_selections[j].disselections_name = updates.disselections;
+                                }
+                            }
+                        }
+                    }
+                    localStorage.setItem('users', JSON.stringify(users));
+
+                    // check for fake auth token in header and return users if valid, this security is implemented server side in a real application
+                    if (opts.headers && opts.headers.Authorization === 'Bearer fake-jwt-token') {
+                        resolve({ ok: true, text: () => Promise.resolve(JSON.stringify(users))});
+                    } else {
+                        // return 401 not authorised if token is null or invalid
+                        reject('Unauthorised');
+                    }
+
+                    return;
+                }
+
                 // get models
                 if (url.endsWith('/models') && opts.method === 'GET') {
                     // check for fake auth token in header and return users if valid, this security is implemented server side in a real application

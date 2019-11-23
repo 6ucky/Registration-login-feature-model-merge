@@ -100,7 +100,7 @@
             <div class="modal-dialog" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="mergeModalTitle">Critical stakeholder</h5>
+                        <h5 class="modal-title" id="criticaluserModalTitle">Critical stakeholder</h5>
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
                         </button>
@@ -124,7 +124,26 @@
                 </div>
             </div>
         </div>
-        <subcotalogue ref="tree" style="display:none"></subcotalogue>
+        <div class="modal fade" id="resultModal" tabindex="-1" role="dialog" aria-labelledby="resultModalTitle" aria-hidden="true">
+            <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="resultModalTitle">Final solution</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <span>Rule{{resultmessage}} are applied. The computing of MCS costs {{runtime}} ms.</span>
+                        <div style="height:400px">
+                            <subcotalogue ref="tree"></subcotalogue>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                    </div>
+                </div>
+            </div>  
+        </div>
         <p>
             <router-link to="/login">Logout</router-link>
         </p>
@@ -143,7 +162,9 @@ export default {
             currentmodelname:'',
             conflict_results:[],
             currentuser:{},
-            applytoallusers: false
+            applytoallusers: false,
+            runtime:'',
+            resultmessage:''
         }
     },
     components:{
@@ -171,10 +192,10 @@ export default {
             }
             this.currentuser = {...temp};
         },
-        ...mapActions('model', ['addselections', 'adddisselections']),
         ...mapActions('users', {
             getAllUsers: 'getAll',
-            deleteUser: 'delete'
+            deleteUser: 'delete',
+            applyallcurrentusers: 'applyAll'
         }),
         ...mapActions('models', {
             getAllModels: 'getAll',
@@ -203,6 +224,13 @@ export default {
             return '';
         },
         startmerge(){
+            this.$refs.tree.data = [];
+            this.critical_user = '';
+            this.applytoallusers = false;
+            this.runtime = '';
+            this.resultmessage = '';
+            var moment = require('moment');
+            this.runtime = moment().valueOf();
             let xmlobject = {};
             for(let i = 0; i < this.models.items.length; i++)
             {
@@ -265,7 +293,6 @@ export default {
                 }
             }
             this.getconstraintconflicts(xmlobject, this.$refs.tree.data, select_list, unselect_list);
-            console.log(this.users);
             
             //get MCS
             let MCS = [];
@@ -295,9 +322,15 @@ export default {
                         r5 = true;
                 }
                 if(r1)
+                {
                     this.$set(results, this.getsolution1(MCS));
+                    this.resultmessage+=' 1';
+                }
                 if(r2)
+                {
+                    this.resultmessage+=' 2';
                     this.$set(results, this.getsolution2(MCS));
+                }
                 // if(r3)
                 //     this.$set(results, this.getsolution3(MCS));
                 // if(r4)
@@ -351,8 +384,6 @@ export default {
                         if(!this.$refs.tree.data[i].data.tick && this.$refs.tree.data[i].data.default_tick)
                             final_unselect_list.push(this.$refs.tree.data[i].data.nodeName);
                     }
-                    console.log(final_select_list);
-                    console.log(final_unselect_list);
                     if(this.applytoallusers)
                         this.updateallusersolution(final_select_list,final_unselect_list);
                 }
@@ -368,19 +399,20 @@ export default {
                             critical_disselections = this.getdisselections(allusers[key].model_selections);
                         }
                     }
-                    console.log(critical_selections);
-                    console.log(critical_disselections);
                     if(this.applytoallusers)
                         this.updateallusersolution(critical_selections,critical_disselections);
+                    this.resultmessage = ' default';
                 }
             }
-            console.log(this.users);
-            this.$refs.tree.data = [];
-            if(MCS.length === 0)
-                alert('No MCS');
-            else
-                alert(JSON.stringify(MCS));
+            this.runtime = moment().valueOf() - this.runtime;
+            // if(MCS.length === 0)
+            //     alert('No MCS');
+            // else
+            //     alert(JSON.stringify(MCS));
             $('#criticaluserModal').modal('toggle');
+            $('#mergeModal').modal('toggle');
+            $('#resultModal').modal('show');
+            this.$refs.tree.showupload = false;
         },
         getconstraintconflicts(xmlobject, data, select_list, unselect_list)
         {
@@ -663,12 +695,12 @@ export default {
 
             let allusers = this.currentuser;
             let name = this.currentmodelname;
+            let id = [];
             for(let key in allusers)
             {
-                let id = allusers[key].id;
-                this.addselections({id ,selected_list, selections, name});
-                this.adddisselections({id ,disselected_list, disselections, name});
+                id.push(allusers[key].id);
             }
+            this.applyallcurrentusers({id ,selected_list, selections, disselected_list, disselections, name});
         }
     }
 };
@@ -677,5 +709,9 @@ export default {
 <style scoped>
 td {
   word-break: break-all;
+}
+
+.modal-body {
+    overflow-y: auto;
 }
 </style>

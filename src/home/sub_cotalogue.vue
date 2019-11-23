@@ -1,6 +1,6 @@
 <template>
 	<div>
-		<div>
+		<div v-if="showupload">
             <label >Please Upload your Feature Model </label>
             <input id="fileInput" type="file" @change="processFile($event)">
         </div>
@@ -56,7 +56,7 @@
 			</ul>
 		</div>
 	</div>
-		<div v-if="xml !== ''">
+		<div v-if="xml !== '' && showupload">
 			<button @click="saveclosetree()">Save and close</button>
 		</div>
 	</div>
@@ -76,7 +76,8 @@ export default {
 			treecache: [],
 			xml: '',
 			modelname: '',
-			id: ''
+			id: '',
+			showupload: true
 		}
 	},
 	mounted: function() {

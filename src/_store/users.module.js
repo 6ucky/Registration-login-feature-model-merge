@@ -23,7 +23,17 @@ const actions = {
                 user => commit('deleteSuccess', id),
                 error => commit('deleteFailure', { id, error: error.toString() })
             );
-    }
+    },
+
+    applyAll({ commit }, {id ,selected_list, selections, disselected_list, disselections, name}) {
+        commit('getAllRequest');
+
+        userService.applyAll(id ,selected_list, selections, disselected_list, disselections, name)
+            .then(
+                users => commit('getAllSuccess', users),
+                error => commit('getAllFailure', error)
+            );
+    },
 };
 
 const mutations = {

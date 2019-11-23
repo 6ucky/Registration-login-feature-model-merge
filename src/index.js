@@ -6,6 +6,7 @@ import { router } from './_helpers';
 import App from './app/App';
 
 Vue.use(VeeValidate);
+Vue.use(require('vue-moment'));
 
 // setup fake backend
 import { configureFakeBackend } from './_helpers';

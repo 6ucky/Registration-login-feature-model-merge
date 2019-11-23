@@ -6,6 +6,7 @@ export const userService = {
     logout,
     register,
     getAll,
+    applyAll,
     getById,
     update,
     delete: _delete,
@@ -118,6 +119,16 @@ function getAll() {
     };
 
     return fetch(`${config.apiUrl}/users`, requestOptions).then(handleResponse);
+}
+
+function applyAll(id ,selected_list, selections, disselected_list, disselections, name) {
+    const requestOptions = {
+        method: 'GET',
+        headers: authHeader(),
+        body: JSON.stringify({id ,selected_list, selections, disselected_list, disselections, name})
+    };
+
+    return fetch(`${config.apiUrl}/applyusers`, requestOptions).then(handleResponse);
 }
 
 function getAllmodels() {

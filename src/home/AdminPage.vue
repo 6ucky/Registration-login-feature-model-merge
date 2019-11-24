@@ -225,8 +225,6 @@ export default {
         },
         startmerge(){
             this.$refs.tree.data = [];
-            this.critical_user = '';
-            this.applytoallusers = false;
             this.runtime = '';
             this.resultmessage = '';
             var moment = require('moment');
@@ -413,6 +411,8 @@ export default {
             $('#mergeModal').modal('toggle');
             $('#resultModal').modal('show');
             this.$refs.tree.showupload = false;
+            this.critical_user = '';
+            this.applytoallusers = false;
         },
         getconstraintconflicts(xmlobject, data, select_list, unselect_list)
         {

@@ -60,6 +60,17 @@ const actions = {
             }
         );
     },
+    addselections({ dispatch, commit }, {id ,selected_list, selected_list_name,disselected_list, disselected_list_name, name}) {
+        userService.addselections(id, selected_list, selected_list_name,disselected_list, disselected_list_name, name).then(
+            user => {
+                commit('loginSuccess', user);
+            },
+            error => {
+                commit('loginFailure', error);
+                dispatch('alert/error', error, { root: true });
+            }
+        );
+    },
     updateuser({ dispatch, commit })
     {
         userService.updateuser(user).then(

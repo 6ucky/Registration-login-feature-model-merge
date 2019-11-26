@@ -137,6 +137,8 @@ export function configureFakeBackend() {
                                 cache.selections_name = [];
                                 cache.disselections = [];
                                 cache.disselections_name = [];
+                                cache.history = [];
+                                cache.time = '';
                                 users[i].model_selections.push(cache);
                                 localStorage.setItem('users', JSON.stringify(users));
                             }
@@ -177,6 +179,8 @@ export function configureFakeBackend() {
                             temp.selections_name = [];
                             temp.disselections = [];
                             temp.disselections_name = [];
+                            temp.history = [];
+                            temp.time = '';
                             users[i].model_selections.push(temp);
                             localStorage.setItem('users', JSON.stringify(users));
                         }
@@ -192,8 +196,10 @@ export function configureFakeBackend() {
                  if (url.endsWith('/models/addselections') && opts.method === 'POST') {
                     // get parameters from post request
                     let newModel = JSON.parse(opts.body);
+                    let responseJson = {};
 
-
+                    var moment = require('moment');
+                    let currenttime = moment().format("dddd, MMMM Do YYYY, h:mm:ss a");
                     for(let i = 0; i < users.length; i++)
                     {
                         if(users[i].id === newModel.id)
@@ -202,20 +208,44 @@ export function configureFakeBackend() {
                             {
                                 if(users[i].model_selections[j].name === newModel.name)
                                 {
-                                    console.log(users[i].model_selections[j].selections_name);
-                                    console.log(newModel.selected_list_name);
+                                    if(users[i].model_selections[j].time !== '')
+                                    {
+                                        let temp = {};
+                                        temp.time = users[i].model_selections[j].time;
+                                        temp.selections = users[i].model_selections[j].selections;
+                                        temp.selections_name = users[i].model_selections[j].selections_name;
+                                        temp.disselections = users[i].model_selections[j].disselections;
+                                        temp.disselections_name = users[i].model_selections[j].disselections_name;
+                                        users[i].model_selections[j].history.push(temp);
+                                    }
                                     users[i].model_selections[j].selections = newModel.selected_list;
                                     users[i].model_selections[j].selections_name = newModel.selected_list_name;
                                     users[i].model_selections[j].disselections = newModel.disselected_list;
                                     users[i].model_selections[j].disselections_name = newModel.disselected_list_name;
+                                    users[i].model_selections[j].time = currenttime;
                                     localStorage.setItem('users', JSON.stringify(users));
+                                    responseJson = {
+                                        id: users[i].id,
+                                        username: users[i].username,
+                                        firstName: users[i].firstName,
+                                        lastName: users[i].lastName,
+                                        r1: users[i].r1,
+                                        r2: users[i].r2,
+                                        r3: users[i].r3,
+                                        r4: users[i].r4,
+                                        r5: users[i].r5,
+                                        model_selections: users[i].model_selections,
+                                        status: users[i].status,
+                                        role: users[i].role,
+                                        token: 'fake-jwt-token'
+                                    };
                                 }
                             }
                         }
                     }
 
                     // respond 200 OK
-                    resolve({ ok: true, text: () => Promise.resolve() });
+                    resolve({ ok: true, text: () => Promise.resolve(JSON.stringify(responseJson)) });
 
                     return;
                 }
@@ -275,6 +305,8 @@ export function configureFakeBackend() {
                 // apply updates to all users and get users
                 if (url.endsWith('/applyusers') && opts.method === 'GET') {
                     let updates = JSON.parse(opts.body);
+                    var moment = require('moment');
+                    let currenttime = moment().format("dddd, MMMM Do YYYY, h:mm:ss a");
                     for(let i = 0; i < users.length; i++)
                     {
                         if(updates.id.includes(users[i].id))
@@ -283,10 +315,21 @@ export function configureFakeBackend() {
                             {
                                 if(users[i].model_selections[j].name === updates.name)
                                 {
+                                    if(users[i].model_selections[j].time !== '')
+                                    {
+                                        let temp = {};
+                                        temp.time = users[i].model_selections[j].time;
+                                        temp.selections = users[i].model_selections[j].selections;
+                                        temp.selections_name = users[i].model_selections[j].selections_name;
+                                        temp.disselections = users[i].model_selections[j].disselections;
+                                        temp.disselections_name = users[i].model_selections[j].disselections_name;
+                                        users[i].model_selections[j].history.push(temp);
+                                    }
                                     users[i].model_selections[j].selections = updates.selected_list;
                                     users[i].model_selections[j].selections_name = updates.selections;
                                     users[i].model_selections[j].disselections = updates.disselected_list;
                                     users[i].model_selections[j].disselections_name = updates.disselections;
+                                    users[i].model_selections[j].time = currenttime;
                                 }
                             }
                         }

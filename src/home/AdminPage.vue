@@ -329,78 +329,75 @@ export default {
                     this.resultmessage+=' 2';
                     this.$set(results, this.getsolution2(MCS));
                 }
-                // if(r3)
-                //     this.$set(results, this.getsolution3(MCS));
-                // if(r4)
-                //     this.$set(results, this.getsolution4(MCS));
+                if(r3)
+                {
+                    this.resultmessage+=' 3';
+                    let sol3 = this.getsolution3(MCS);
+                    if(sol3 !== '')
+                        this.$set(results, sol3);
+                }
+                if(r4)
+                {
+                    this.resultmessage+=' 4';
+                    let sol4 = this.getsolution4(MCS);
+                    if(sol4 !== '')
+                        this.$set(results, sol4);
+                }
                 // if(r5)
                 //     this.$set(results, this.getsolution5(MCS));
-                console.log(Object.keys(results));
                 if(Object.keys(results).length === 1)
                 {
-                    let solutions = [];
-                    solutions.push(JSON.stringify(Object.keys(results)).split(',')[0].split('["')[1]);
-                    for(let i = 1; i < JSON.stringify(Object.keys(results)).split(',').length-1; i++)
-                    {
-                        solutions.push(JSON.stringify(Object.keys(results)).split(',')[i]);
-                    }
-                    solutions.push(JSON.stringify(Object.keys(results)).split(',')[JSON.stringify(Object.keys(results)).split(',').length-1].split('"]')[0]);
-                    
-                    for(let i = 0 ; i < solutions.length; i++)
-                    {
-                        if(solutions[i].indexOf('!') !== -1)
-                        {
-                            for(let j = 0; j < this.$refs.tree.data.length; j++)
-                            {
-                                if(this.$refs.tree.data[j].data.nodeName === solutions[i].substring(1))
-                                {
-                                    this.$refs.tree.data[j].data.tick = true;
-                                    this.$refs.tree.data[j].data.default_tick = true;
-                                    this.$refs.tree.itemclick(j);
-                                }
-                            }
-                        }
-                        else
-                        {
-                            for(let j = 0; j < this.$refs.tree.data.length; j++)
-                            {
-                                if(this.$refs.tree.data[j].data.nodeName === solutions[i])
-                                {
-                                    this.$refs.tree.data[j].data.tick = false;
-                                    this.$refs.tree.data[j].data.default_tick = true;
-                                    this.$refs.tree.itemclick(j);
-                                }
-                            }
-                        }
-                    }
-                    let final_select_list = [];
-                    let final_unselect_list = [];
-                    for(let i = 0; i < this.$refs.tree.data.length; i++)
-                    {
-                        if(this.$refs.tree.data[i].data.tick && this.$refs.tree.data[i].data.default_tick)
-                            final_select_list.push(this.$refs.tree.data[i].data.nodeName);
-                        if(!this.$refs.tree.data[i].data.tick && this.$refs.tree.data[i].data.default_tick)
-                            final_unselect_list.push(this.$refs.tree.data[i].data.nodeName);
-                    }
-                    if(this.applytoallusers)
-                        this.updateallusersolution(final_select_list,final_unselect_list);
+                    this.applytotree(JSON.stringify(Object.keys(results)));
                 }
                 else
                 {
-                    let critical_selections = [];
-                    let critical_disselections = [];
-                    for(let key in allusers)
+                    MCS = this.computeMCS();
+                    let sol3 = this.getsolution3(MCS);
+                    if(sol3 !== '' && MCS.length !== 0)
                     {
-                        if(this.critical_user === allusers[key].firstName + ' ' + allusers[key].lastName)
-                        {
-                            critical_selections = this.getselections(allusers[key].model_selections);
-                            critical_disselections = this.getdisselections(allusers[key].model_selections);
-                        }
+                        this.$set(results, sol3);
+                        this.applytotree(JSON.stringify(Object.keys(results)));
+                        this.resultmessage = ' history';
                     }
-                    if(this.applytoallusers)
-                        this.updateallusersolution(critical_selections,critical_disselections);
-                    this.resultmessage = ' default';
+                    else
+                    {
+                        let critical_selections = [];
+                        let critical_disselections = [];
+                        for(let key in allusers)
+                        {
+                            if(this.critical_user === allusers[key].firstName + ' ' + allusers[key].lastName)
+                            {
+                                critical_selections = this.getselections(allusers[key].model_selections);
+                                critical_disselections = this.getdisselections(allusers[key].model_selections);
+                            }
+                        }
+                        for(let i = 0; i < this.$refs.tree.data.length; i++)
+                        {
+                            if(critical_selections.includes(this.$refs.tree.data[i].data.nodeName))
+                            {
+                                this.$refs.tree.data[i].data.tick = true;
+                                this.$refs.tree.data[i].data.default_tick = true;
+                            }
+                            else if(critical_disselections.includes(this.$refs.tree.data[i].data.nodeName))
+                            {
+                                this.$refs.tree.data[i].data.tick = false;
+                                this.$refs.tree.data[i].data.default_tick = true;
+                            }
+                            else
+                            {
+                                this.$refs.tree.data[i].data.tick = false;
+                                this.$refs.tree.data[i].data.default_tick = false;
+                            }
+                        }
+                        if(this.applytoallusers)
+                            this.updateallusersolution(critical_selections,critical_disselections);
+                        this.resultmessage = ' super stakeholder';
+                    }
                 }
+            }
+            else
+            {
+                this.resultmessage = ' null';
             }
             this.runtime = moment().valueOf() - this.runtime;
             // if(MCS.length === 0)
@@ -673,10 +670,115 @@ export default {
             return MCS[index];
         },
         getsolution3(MCS){
-
+            let allusers = this.currentuser;
+            let history = [];
+            for(let key in allusers)
+            {
+                for(let i = 0 ; i < allusers[key].model_selections.length; i++)
+                {
+                    if(allusers[key].model_selections[i].name === this.currentmodelname && allusers[key].model_selections[i].history.length !== 0)
+                    {
+                        for(let j = 0; j < allusers[key].model_selections[i].history.length; j++)
+                        {
+                            for(let k = 0; k <allusers[key].model_selections[i].history[j].selections_name.length; k++)
+                            {
+                                allusers[key].model_selections[i].history[j].selections_name[k] = '!'+ allusers[key].model_selections[i].history[j].selections_name[k];
+                            }
+                            history.push(allusers[key].model_selections[i].history[j].selections_name.concat(allusers[key].model_selections[i].history[j].disselections_name));
+                        }
+                    }
+                }
+            }
+            let delete_list = [];
+            for(let i = 0; i < history.length; i++)
+            {
+                for(let j = 0; j < MCS.length; j++)
+                {
+                    let temp = MCS[j];
+                    let temp_length = temp.length;
+                    for(let k = 0; k < temp.length; k++)
+                    {
+                        for(let x = 0; x < history[i].length; x++)
+                        {
+                            if(history[i][x]===temp[k])
+                                temp_length--;
+                        }
+                    }
+                    if(temp_length === 0 && !delete_list.includes(j))
+                    {
+                        delete_list.push(j);
+                    }
+                }
+            }
+            let newMCS = [];
+            for(let i = 0; i < delete_list.length; i++)
+            {
+                newMCS.push(MCS[delete_list[i]]);
+            }
+            if(newMCS.length === 0)
+                return '';
+            return newMCS[0];
         },
         getsolution4(MCS){
-
+            let allusers = this.currentuser;
+            let totalkey = [];
+            for(let key in allusers)
+            {
+                totalkey.push(key);
+            }
+            let sameprofile = [];
+            for(let i = 0; i < totalkey.length; i++)
+            {
+                for(let j = 0; j < totalkey.length; j++)
+                {
+                    if(i !== j && allusers[totalkey[i]].role === allusers[totalkey[j]].role && allusers[totalkey[i]].status === allusers[totalkey[j]].status && !sameprofile.includes(totalkey[i]))
+                        sameprofile.push(totalkey[i]);
+                }
+            }
+            let history = [];
+            for(let key = 0; key < sameprofile.length; key++)
+            {
+                for(let i = 0 ; i < allusers[key].model_selections.length; i++)
+                {
+                    if(allusers[key].model_selections[i].name === this.currentmodelname)
+                    {
+                        for(let j = 0; j < allusers[key].model_selections[i].selections_name.length; j++)
+                        {
+                            allusers[key].model_selections[i].selections_name[j] = '!'+ allusers[key].model_selections[i].selections_name[j];
+                        }
+                        history.push(allusers[key].model_selections[i].selections_name.concat(allusers[key].model_selections[i].disselections_name));
+                    }
+                }
+            }
+            let delete_list = [];
+            for(let i = 0; i < history.length; i++)
+            {
+                for(let j = 0; j < MCS.length; j++)
+                {
+                    let temp = MCS[j];
+                    let temp_length = temp.length;
+                    for(let k = 0; k < temp.length; k++)
+                    {
+                        for(let x = 0; x < history[i].length; x++)
+                        {
+                            if(history[i][x]===temp[k])
+                                temp_length--;
+                        }
+                    }
+                    if(temp_length === 0 && !delete_list.includes(j))
+                    {
+                        delete_list.push(j);
+                    }
+                }
+            }
+            let newMCS = [];
+            for(let i = 0; i < delete_list.length; i++)
+            {
+                newMCS.push(MCS[delete_list[i]]);
+            }
+            if(newMCS.length === 0)
+                return '';
+            return newMCS[0];
         },
         getsolution5(MCS){
 
@@ -701,6 +803,55 @@ export default {
                 id.push(allusers[key].id);
             }
             this.applyallcurrentusers({id ,selected_list, selections, disselected_list, disselections, name});
+        },
+        applytotree(results)
+        {
+            let solutions = [];
+                    solutions.push(results.split(',')[0].split('["')[1]);
+                    for(let i = 1; i < results.split(',').length-1; i++)
+                    {
+                        solutions.push(results.split(',')[i]);
+                    }
+                    solutions.push(results.split(',')[results.split(',').length-1].split('"]')[0]);
+                    
+                    for(let i = 0 ; i < solutions.length; i++)
+                    {
+                        if(solutions[i].indexOf('!') !== -1)
+                        {
+                            for(let j = 0; j < this.$refs.tree.data.length; j++)
+                            {
+                                if(this.$refs.tree.data[j].data.nodeName === solutions[i].substring(1))
+                                {
+                                    this.$refs.tree.data[j].data.tick = true;
+                                    this.$refs.tree.data[j].data.default_tick = true;
+                                    this.$refs.tree.itemclick(j);
+                                }
+                            }
+                        }
+                        else
+                        {
+                            for(let j = 0; j < this.$refs.tree.data.length; j++)
+                            {
+                                if(this.$refs.tree.data[j].data.nodeName === solutions[i])
+                                {
+                                    this.$refs.tree.data[j].data.tick = false;
+                                    this.$refs.tree.data[j].data.default_tick = true;
+                                    this.$refs.tree.itemclick(j);
+                                }
+                            }
+                        }
+                    }
+                    let final_select_list = [];
+                    let final_unselect_list = [];
+                    for(let i = 0; i < this.$refs.tree.data.length; i++)
+                    {
+                        if(this.$refs.tree.data[i].data.tick && this.$refs.tree.data[i].data.default_tick)
+                            final_select_list.push(this.$refs.tree.data[i].data.nodeName);
+                        if(!this.$refs.tree.data[i].data.tick && this.$refs.tree.data[i].data.default_tick)
+                            final_unselect_list.push(this.$refs.tree.data[i].data.nodeName);
+                    }
+                    if(this.applytoallusers)
+                        this.updateallusersolution(final_select_list,final_unselect_list);
         }
     }
 };

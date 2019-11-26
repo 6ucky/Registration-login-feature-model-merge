@@ -101,7 +101,15 @@ function addselections(id, selected_list, selected_list_name,disselected_list, d
         body: JSON.stringify({id, selected_list, selected_list_name,disselected_list, disselected_list_name, name})
     };
 
-    return fetch(`${config.apiUrl}/models/addselections`, requestOptions).then(handleResponse);
+    return fetch(`${config.apiUrl}/models/addselections`, requestOptions).then(handleResponse).then(user => {
+        // login successful if there's a jwt token in the response
+        if (user.token) {
+            // store user details and jwt token in local storage to keep user logged in between page refreshes
+            localStorage.setItem('user', JSON.stringify(user));
+        }
+
+        return user;
+    });
 }
 
 function updatepersonalinfo(r1,r2,r3,r4,r5,status,role,id) {

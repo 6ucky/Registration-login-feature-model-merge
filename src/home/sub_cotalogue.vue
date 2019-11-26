@@ -61,6 +61,7 @@
 	</div>
 		<div v-if="xml !== '' && showupload">
 			<button @click="saveclosetree()">Save and close</button>
+			<button @click="closetree()">Do not save and close</button>
 		</div>
 	</div>
 </template>
@@ -135,8 +136,8 @@ export default {
         })
     },
 	methods: {
-		...mapActions('account', ['updateuser']),
-		...mapActions('model', ['new_model','addselections','user_new_model']),
+		...mapActions('account', ['addselections']),
+		...mapActions('model', ['new_model','user_new_model']),
 		/**
 		 * construct the element tree
 		 * @todo improve the rule of showing up elements
@@ -618,7 +619,13 @@ export default {
 			let name = this.modelname;
 			let thisdata = this.data;
 			this.addselections({id ,selected_list, selected_list_name, disselected_list, disselected_list_name, name});
-			this.updateuser();
+			this.xml = '';
+			this.data = [];
+			let input = document.getElementById('fileInput');
+			input.type = 'text';
+    		input.type = 'file';
+		},
+		closetree(){
 			this.xml = '';
 			this.data = [];
 			let input = document.getElementById('fileInput');

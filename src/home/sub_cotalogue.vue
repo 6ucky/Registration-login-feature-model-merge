@@ -135,7 +135,8 @@ export default {
         })
     },
 	methods: {
-		...mapActions('model', ['new_model','addselections', 'adddisselections','user_new_model']),
+		...mapActions('account', ['updateuser']),
+		...mapActions('model', ['new_model','addselections','user_new_model']),
 		/**
 		 * construct the element tree
 		 * @todo improve the rule of showing up elements
@@ -616,8 +617,8 @@ export default {
 			let id = this.account.user.id;
 			let name = this.modelname;
 			let thisdata = this.data;
-			this.addselections({id ,selected_list, selected_list_name, name});
-			this.adddisselections({id ,disselected_list, disselected_list_name, name});
+			this.addselections({id ,selected_list, selected_list_name, disselected_list, disselected_list_name, name});
+			this.updateuser();
 			this.xml = '';
 			this.data = [];
 			let input = document.getElementById('fileInput');

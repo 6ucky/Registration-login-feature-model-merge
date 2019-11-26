@@ -3,6 +3,7 @@ import { authHeader } from '../_helpers';
 
 export const userService = {
     login,
+    updateuser,
     logout,
     register,
     getAll,
@@ -12,7 +13,6 @@ export const userService = {
     delete: _delete,
     addmodel,
     addselections,
-    adddisselections,
     getAllmodels,
     deletemodels:_deletemodels,
     usernewmodel,
@@ -27,6 +27,26 @@ function login(username, password) {
     };
 
     return fetch(`${config.apiUrl}/users/authenticate`, requestOptions)
+        .then(handleResponse)
+        .then(user => {
+            // login successful if there's a jwt token in the response
+            if (user.token) {
+                // store user details and jwt token in local storage to keep user logged in between page refreshes
+                localStorage.setItem('user', JSON.stringify(user));
+            }
+
+            return user;
+        });
+}
+
+function updateuser(user){
+    const requestOptions = {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user })
+    };
+
+    return fetch(`${config.apiUrl}/users/refresh`, requestOptions)
         .then(handleResponse)
         .then(user => {
             // login successful if there's a jwt token in the response
@@ -74,24 +94,14 @@ function usernewmodel(modelname, id) {
     return fetch(`${config.apiUrl}/users/addmodel`, requestOptions).then(handleResponse);
 }
 
-function addselections(id, selected_list, selected_list_name, modelname) {
+function addselections(id, selected_list, selected_list_name,disselected_list, disselected_list_name, name) {
     const requestOptions = {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({id, selected_list, selected_list_name, modelname})
+        body: JSON.stringify({id, selected_list, selected_list_name,disselected_list, disselected_list_name, name})
     };
 
     return fetch(`${config.apiUrl}/models/addselections`, requestOptions).then(handleResponse);
-}
-
-function adddisselections(id, disselected_list, disselected_list_name, modelname) {
-    const requestOptions = {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({id, disselected_list, disselected_list_name, modelname})
-    };
-
-    return fetch(`${config.apiUrl}/models/adddisselections`, requestOptions).then(handleResponse);
 }
 
 function updatepersonalinfo(r1,r2,r3,r4,r5,status,role,id) {

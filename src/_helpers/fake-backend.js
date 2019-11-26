@@ -55,6 +55,44 @@ export function configureFakeBackend() {
 
                     return;
                 }
+
+                // authenticate
+                if (url.endsWith('/users/refresh') && opts.method === 'POST') {
+                    // get parameters from post request
+                    let params = JSON.parse(opts.body);
+
+                    // find if any user matches login credentials
+                    let filteredUsers = users.filter(user => {
+                        return user.id === params.user.id;
+                    });
+
+                    if (filteredUsers.length) {
+                        // if login details are valid return user details and fake jwt token
+                        let user = filteredUsers[0];
+                        let responseJson = {
+                            id: user.id,
+                            username: user.username,
+                            firstName: user.firstName,
+                            lastName: user.lastName,
+                            r1: user.MCS.r1,
+                            r2: user.MCS.r2,
+                            r3: user.MCS.r3,
+                            r4: user.MCS.r4,
+                            r5: user.MCS.r5,
+                            model_selections: user.model_selections,
+                            status: user.status,
+                            role: user.role,
+                            token: 'fake-jwt-token'
+                        };
+                        resolve({ ok: true, text: () => Promise.resolve(JSON.stringify(responseJson)) });
+                    } else {
+                        // else return error
+                        reject('Username or password is incorrect');
+                    }
+
+                    return;
+                }
+
                 // add models
                 if (url.endsWith('/models/add') && opts.method === 'POST') {
                     // get parameters from post request
@@ -162,36 +200,12 @@ export function configureFakeBackend() {
                         {
                             for(let j = 0; j < users[i].model_selections.length; j++)
                             {
-                                if(users[i].model_selections[j].name === newModel.modelname)
+                                if(users[i].model_selections[j].name === newModel.name)
                                 {
+                                    console.log(users[i].model_selections[j].selections_name);
+                                    console.log(newModel.selected_list_name);
                                     users[i].model_selections[j].selections = newModel.selected_list;
                                     users[i].model_selections[j].selections_name = newModel.selected_list_name;
-                                    localStorage.setItem('users', JSON.stringify(users));
-                                }
-                            }
-                        }
-                    }
-
-                    // respond 200 OK
-                    resolve({ ok: true, text: () => Promise.resolve() });
-
-                    return;
-                }
-
-                 // add model disselections
-                 if (url.endsWith('/models/adddisselections') && opts.method === 'POST') {
-                    // get parameters from post request
-                    let newModel = JSON.parse(opts.body);
-
-
-                    for(let i = 0; i < users.length; i++)
-                    {
-                        if(users[i].id === newModel.id)
-                        {
-                            for(let j = 0; j < users[i].model_selections.length; j++)
-                            {
-                                if(users[i].model_selections[j].name === newModel.modelname)
-                                {
                                     users[i].model_selections[j].disselections = newModel.disselected_list;
                                     users[i].model_selections[j].disselections_name = newModel.disselected_list_name;
                                     localStorage.setItem('users', JSON.stringify(users));

@@ -59,6 +59,18 @@ const actions = {
                 dispatch('alert/error', error, { root: true });
             }
         );
+    },
+    updateuser({ dispatch, commit })
+    {
+        userService.updateuser(user).then(
+            user => {
+                commit('loginSuccess', user);
+            },
+            error => {
+                commit('loginFailure', error);
+                dispatch('alert/error', error, { root: true });
+            }
+        );
     }
 };
 

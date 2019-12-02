@@ -38,6 +38,18 @@
                         </button>
                     </div>
                     <div class="modal-body">
+                        <div class="form-group">
+                            Please select one critical stakeholder:  
+                            <select v-model="critical_user" >
+                                <option disabled value="">Select</option>
+                                <option v-for="user in currentuser" :key="user.id">
+                                    {{user.firstName}} {{user.lastName}}
+                                </option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <input type="checkbox" v-model="applytoallusers"/>Send the final configuration to all the stakeholders.<br/>
+                        </div>
                         <table class="table table-bordered">
                             <thead>
                                 <tr>
@@ -91,35 +103,7 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#criticaluserModal">Choose critical stakeholder</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="modal fade" id="criticaluserModal" tabindex="-1" role="dialog" aria-labelledby="criticaluserModalTitle" aria-hidden="true">
-            <div class="modal-dialog" role="document">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="criticaluserModalTitle">Critical stakeholder</h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-                    <div class="modal-body">
-                        <div class="form-group">
-                            <select v-model="critical_user" >
-                                <option disabled value="">Select</option>
-                                <option v-for="user in currentuser" :key="user.id">
-                                    {{user.firstName}} {{user.lastName}}
-                                </option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <input type="checkbox" v-model="applytoallusers"/>Apply the final solution to all the users <br/>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-primary" @click="startmerge();applytoallusers=false;">Start merge</button>
+                        <button type="button" class="btn btn-primary" @click="startmerge();applytoallusers=false;">Start resolution</button>
                     </div>
                 </div>
             </div>
@@ -128,7 +112,7 @@
             <div class="modal-dialog modal-lg" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="resultModalTitle">Final solution</h5>
+                        <h5 class="modal-title" id="resultModalTitle">Final configuration</h5>
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
                         </button>
@@ -296,6 +280,13 @@ export default {
             let MCS = [];
             if(this.conflict_results.length !== 0)
                 MCS = this.computeMCS();
+            if(MCS.length === 0)
+                alert('No conflicts');
+            else
+                alert('Conflict detected.\nThe list of MCS is:\n' + JSON.stringify(MCS));
+            /**
+             * @todo show final MCS
+             */
             //choose one solution
             if(MCS.length !== 0)
             {
@@ -321,45 +312,49 @@ export default {
                 }
                 if(r1)
                 {
-                    this.$set(results, this.getsolution1(MCS));
+                    results.push(this.getsolution1(MCS));
                     this.resultmessage+=' 1';
                 }
                 if(r2)
                 {
+                    results.push(this.getsolution2(MCS));
                     this.resultmessage+=' 2';
-                    this.$set(results, this.getsolution2(MCS));
                 }
-                if(r3)
-                {
-                    this.resultmessage+=' 3';
-                    let sol3 = this.getsolution3(MCS);
-                    if(sol3 !== '')
-                        this.$set(results, sol3);
-                }
-                if(r4)
-                {
-                    this.resultmessage+=' 4';
-                    let sol4 = this.getsolution4(MCS);
-                    if(sol4 !== '')
-                        this.$set(results, sol4);
-                }
+                // if(r3)
+                // {
+                //     this.resultmessage+=' 3';
+                //     let sol3 = this.getsolution3(MCS);
+                //     if(sol3 !== '')
+                //         this.$set(results, sol3);
+                // }
+                // if(r4)
+                // {
+                //     this.resultmessage+=' 4';
+                //     let sol4 = this.getsolution4(MCS);
+                //     if(sol4 !== '')
+                //         this.$set(results, sol4);
+                // }
                 // if(r5)
                 //     this.$set(results, this.getsolution5(MCS));
-                if(Object.keys(results).length === 1)
+                if(results.length === 1)
                 {
-                    this.applytotree(JSON.stringify(Object.keys(results)));
+                    this.applytotree(results[0]);
                 }
                 else
                 {
-                    MCS = this.computeMCS();
-                    let sol3 = this.getsolution3(MCS);
-                    if(sol3 !== '' && MCS.length !== 0)
-                    {
-                        this.$set(results, sol3);
-                        this.applytotree(JSON.stringify(Object.keys(results)));
-                        this.resultmessage = ' history';
-                    }
-                    else
+                    let compareresult = '';
+                    if(results.length !== 0)
+                        compareresult = this.checkonecommon(results);
+                    // MCS = this.computeMCS();
+                    // let sol3 = this.getsolution3(MCS);
+                    // if(sol3 !== '' && MCS.length !== 0)
+                    // {
+                    //     this.$set(results, sol3);
+                    //     this.applytotree(JSON.stringify(Object.keys(results)));
+                    //     this.resultmessage = ' history';
+                    // }
+                    // else
+                    if(compareresult === '')
                     {
                         let critical_selections = [];
                         let critical_disselections = [];
@@ -393,6 +388,10 @@ export default {
                             this.updateallusersolution(critical_selections,critical_disselections);
                         this.resultmessage = ' super stakeholder';
                     }
+                    else
+                    {
+                        this.applytotree(compareresult);
+                    }
                 }
             }
             else
@@ -400,11 +399,7 @@ export default {
                 this.resultmessage = ' null';
             }
             this.runtime = moment().valueOf() - this.runtime;
-            // if(MCS.length === 0)
-            //     alert('No MCS');
-            // else
-            //     alert(JSON.stringify(MCS));
-            $('#criticaluserModal').modal('toggle');
+            
             $('#mergeModal').modal('toggle');
             $('#resultModal').modal('show');
             this.$refs.tree.showupload = false;
@@ -630,6 +625,7 @@ export default {
         getsolution1(MCS){
             let index = '';
             let maxlength = 0;
+            let result = [];
             for(let i = 0; i < MCS.length; i++)
             {
                 let currentlength = 0;
@@ -646,11 +642,25 @@ export default {
                     index = i;
                 }
             }
-            return MCS[index];
+            for(let i = 0; i < MCS.length; i++)
+            {
+                let currentlength = 0;
+                for(let j = 0; j < MCS[i].length; j++)
+                {
+                    if(MCS[i][j].indexOf('!') === -1)
+                    {
+                        currentlength++;
+                    }
+                }
+                if(maxlength === currentlength)
+                    result.push(MCS[i]);
+            }
+            return result;
         },
         getsolution2(MCS){
             let index = '';
             let maxlength = 0;
+            let result = [];
             for(let i = 0; i < MCS.length; i++)
             {
                 let currentlength = 0;
@@ -667,7 +677,20 @@ export default {
                     index = i;
                 }
             }
-            return MCS[index];
+            for(let i = 0; i < MCS.length; i++)
+            {
+                let currentlength = 0;
+                for(let j = 0; j < MCS[i].length; j++)
+                {
+                    if(MCS[i][j].indexOf('!') !== -1)
+                    {
+                        currentlength++;
+                    }
+                }
+                if(maxlength === currentlength)
+                    result.push(MCS[i]);
+            }
+            return result;
         },
         getsolution3(MCS){
             let allusers = this.currentuser;
@@ -806,52 +829,74 @@ export default {
         },
         applytotree(results)
         {
-            let solutions = [];
-                    solutions.push(results.split(',')[0].split('["')[1]);
-                    for(let i = 1; i < results.split(',').length-1; i++)
+            // let solutions = [];
+            //         solutions.push(results.split(',')[0].split('["')[1]);
+            //         for(let i = 1; i < results.split(',').length-1; i++)
+            //         {
+            //             solutions.push(results.split(',')[i]);
+            //         }
+            //         solutions.push(results.split(',')[results.split(',').length-1].split('"]')[0]);
+            alert('The final selected MCS is ' + results[0]);
+            for(let i = 0 ; i < results[0].length; i++)
+            {
+                if(results[0][i].indexOf('!') !== -1)
+                {
+                    for(let j = 0; j < this.$refs.tree.data.length; j++)
                     {
-                        solutions.push(results.split(',')[i]);
-                    }
-                    solutions.push(results.split(',')[results.split(',').length-1].split('"]')[0]);
-                    
-                    for(let i = 0 ; i < solutions.length; i++)
-                    {
-                        if(solutions[i].indexOf('!') !== -1)
+                        if(this.$refs.tree.data[j].data.nodeName === results[0][i].substring(1))
                         {
-                            for(let j = 0; j < this.$refs.tree.data.length; j++)
-                            {
-                                if(this.$refs.tree.data[j].data.nodeName === solutions[i].substring(1))
-                                {
-                                    this.$refs.tree.data[j].data.tick = true;
-                                    this.$refs.tree.data[j].data.default_tick = true;
-                                    this.$refs.tree.itemclick(j);
-                                }
-                            }
-                        }
-                        else
-                        {
-                            for(let j = 0; j < this.$refs.tree.data.length; j++)
-                            {
-                                if(this.$refs.tree.data[j].data.nodeName === solutions[i])
-                                {
-                                    this.$refs.tree.data[j].data.tick = false;
-                                    this.$refs.tree.data[j].data.default_tick = true;
-                                    this.$refs.tree.itemclick(j);
-                                }
-                            }
+                            this.$refs.tree.data[j].data.tick = true;
+                            this.$refs.tree.data[j].data.default_tick = true;
+                            this.$refs.tree.itemclick(j);
                         }
                     }
-                    let final_select_list = [];
-                    let final_unselect_list = [];
-                    for(let i = 0; i < this.$refs.tree.data.length; i++)
+                }
+                else
+                {
+                    for(let j = 0; j < this.$refs.tree.data.length; j++)
                     {
-                        if(this.$refs.tree.data[i].data.tick && this.$refs.tree.data[i].data.default_tick)
-                            final_select_list.push(this.$refs.tree.data[i].data.nodeName);
-                        if(!this.$refs.tree.data[i].data.tick && this.$refs.tree.data[i].data.default_tick)
-                            final_unselect_list.push(this.$refs.tree.data[i].data.nodeName);
+                        if(this.$refs.tree.data[j].data.nodeName === results[0][i])
+                        {
+                            this.$refs.tree.data[j].data.tick = false;
+                            this.$refs.tree.data[j].data.default_tick = true;
+                            this.$refs.tree.itemclick(j);
+                        }
                     }
-                    if(this.applytoallusers)
-                        this.updateallusersolution(final_select_list,final_unselect_list);
+                }
+            }
+            let final_select_list = [];
+            let final_unselect_list = [];
+            for(let i = 0; i < this.$refs.tree.data.length; i++)
+            {
+                if(this.$refs.tree.data[i].data.tick && this.$refs.tree.data[i].data.default_tick)
+                    final_select_list.push(this.$refs.tree.data[i].data.nodeName);
+                if(!this.$refs.tree.data[i].data.tick && this.$refs.tree.data[i].data.default_tick)
+                    final_unselect_list.push(this.$refs.tree.data[i].data.nodeName);
+            }
+            if(this.applytoallusers)
+                this.updateallusersolution(final_select_list,final_unselect_list);
+        },
+        checkonecommon(results)
+        {
+            let count = 0;
+            let common = [];
+            for(let i = 0; i < results[0].length; i++)
+            {
+                let checkpoint = true;
+                for(let j = 1; j < results.length; j++)
+                {
+                    if(JSON.stringify(results[j]).indexOf(results[0][i]) === -1)
+                        checkpoint = false;
+                }
+                if(checkpoint)
+                {
+                    count++;
+                    common.push(results[0][i]);
+                }
+            }
+            if(count !== 1)
+                return '';
+            return common;
         }
     }
 };

@@ -93,30 +93,6 @@ export function configureFakeBackend() {
                     return;
                 }
 
-                // add models
-                if (url.endsWith('/models/add') && opts.method === 'POST') {
-                    // get parameters from post request
-                    let newModel = JSON.parse(opts.body);
-
-                    // validation
-                    let duplicateUser = models.filter(model => { return model.modelname === newModel.modelname; }).length;
-                    if (duplicateUser) {
-                        return;
-                    }
-
-                    let current_user = newModel.user;
-                    // save new model
-                    newModel.id = models.length ? Math.max(...models.map(model => model.id)) + 1 : 1;
-                    delete newModel.user;
-                    models.push(newModel);
-                    localStorage.setItem('models', JSON.stringify(models));
-
-                    // respond 200 OK
-                    resolve({ ok: true, text: () => Promise.resolve() });
-
-                    return;
-                }
-
                 if (url.endsWith('/users/addmodel') && opts.method === 'POST') {
                     let temp = JSON.parse(opts.body);
                     for(let i = 0; i < users.length; i++)
@@ -158,7 +134,6 @@ export function configureFakeBackend() {
                     // validation
                     let duplicateUser = models.filter(model => { return model.modelname === newModel.modelname; }).length;
                     if (duplicateUser) {
-                        reject('Modelname "' + newModel.modelname + '" is already taken');
                         return;
                     }
 
@@ -168,23 +143,6 @@ export function configureFakeBackend() {
                     delete newModel.user;
                     models.push(newModel);
                     localStorage.setItem('models', JSON.stringify(models));
-
-                    for(let i = 0; i < users.length; i++)
-                    {
-                        if(users[i].id === current_user.id)
-                        {
-                            let temp = {};
-                            temp.name = newModel.modelname;
-                            temp.selections = [];
-                            temp.selections_name = [];
-                            temp.disselections = [];
-                            temp.disselections_name = [];
-                            temp.history = [];
-                            temp.time = '';
-                            users[i].model_selections.push(temp);
-                            localStorage.setItem('users', JSON.stringify(users));
-                        }
-                    }
 
                     // respond 200 OK
                     resolve({ ok: true, text: () => Promise.resolve() });
@@ -208,16 +166,6 @@ export function configureFakeBackend() {
                             {
                                 if(users[i].model_selections[j].name === newModel.name)
                                 {
-                                    if(users[i].model_selections[j].time !== '')
-                                    {
-                                        let temp = {};
-                                        temp.time = users[i].model_selections[j].time;
-                                        temp.selections = users[i].model_selections[j].selections;
-                                        temp.selections_name = users[i].model_selections[j].selections_name;
-                                        temp.disselections = users[i].model_selections[j].disselections;
-                                        temp.disselections_name = users[i].model_selections[j].disselections_name;
-                                        users[i].model_selections[j].history.push(temp);
-                                    }
                                     users[i].model_selections[j].selections = newModel.selected_list;
                                     users[i].model_selections[j].selections_name = newModel.selected_list_name;
                                     users[i].model_selections[j].disselections = newModel.disselected_list;
@@ -334,6 +282,20 @@ export function configureFakeBackend() {
                             }
                         }
                     }
+                    for(let i = 0; i < models.length; i++)
+                    {
+                        if(models[i].modelname === updates.name)
+                        {
+                            let temp = {};
+                            temp.selections = updates.selected_list;
+                            temp.selections_name = updates.selections;
+                            temp.disselections = updates.disselected_list;
+                            temp.disselections_name = updates.disselections;
+                            temp.time = currenttime;
+                            models[i].history.push(temp);
+                        }
+                    }
+                    localStorage.setItem('models', JSON.stringify(models));
                     localStorage.setItem('users', JSON.stringify(users));
 
                     // check for fake auth token in header and return users if valid, this security is implemented server side in a real application

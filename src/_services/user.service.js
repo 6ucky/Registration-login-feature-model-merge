@@ -75,10 +75,11 @@ function register(user) {
 }
 
 function addmodel(user,modelname,xml,data,id) {
+    let history = [];
     const requestOptions = {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({user,modelname,xml,data,id})
+        body: JSON.stringify({user,modelname,xml,data,id,history})
     };
 
     return fetch(`${config.apiUrl}/models/add`, requestOptions).then(handleResponse);

@@ -118,7 +118,8 @@
                         </button>
                     </div>
                     <div class="modal-body">
-                        <span>Rule{{resultmessage}} are applied. The computing of MCS costs {{runtime}} ms.</span>
+                        <span>Rule{{resultmessage}} applied. The computing of MCS costs {{runtime}} ms.</span>
+                        {{MCSmessage}}
                         <div style="height:400px">
                             <subcotalogue ref="tree"></subcotalogue>
                         </div>
@@ -148,7 +149,8 @@ export default {
             currentuser:{},
             applytoallusers: false,
             runtime:'',
-            resultmessage:''
+            resultmessage:'',
+            MCSmessage:''
         }
     },
     components:{
@@ -290,6 +292,7 @@ export default {
             //choose one solution
             if(MCS.length !== 0)
             {
+                this.MCSmessage = '\nThe list of MCS is:\n' + JSON.stringify(MCS);
                 let allusers = this.currentuser;
                 let r1 = false;
                 let r2 = false;
@@ -396,6 +399,7 @@ export default {
             }
             else
             {
+                this.MCSmessage = '';
                 this.resultmessage = ' null';
             }
             this.runtime = moment().valueOf() - this.runtime;

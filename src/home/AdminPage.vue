@@ -323,13 +323,13 @@ export default {
                     results.push(this.getsolution2(MCS));
                     this.resultmessage+=' 2';
                 }
-                // if(r3)
-                // {
-                //     this.resultmessage+=' 3';
-                //     let sol3 = this.getsolution3(MCS);
-                //     if(sol3 !== '')
-                //         this.$set(results, sol3);
-                // }
+                if(r3)
+                {
+                    this.resultmessage+=' 3';
+                    let sol3 = this.getsolution3(MCS);
+                    if(sol3 !== '')
+                        results.push(sol3);
+                }
                 // if(r4)
                 // {
                 //     this.resultmessage+=' 4';
@@ -697,54 +697,84 @@ export default {
             return result;
         },
         getsolution3(MCS){
-            let allusers = this.currentuser;
-            let history = [];
-            for(let key in allusers)
+            let result = [];
+            console.log(this.models);
+            if(this.models.items.history.length !== 0)
             {
-                for(let i = 0 ; i < allusers[key].model_selections.length; i++)
+                for(let i = 0; i < this.models.items.history.length; i++)
                 {
-                    if(allusers[key].model_selections[i].name === this.currentmodelname && allusers[key].model_selections[i].history.length !== 0)
+                    for(let j = 0; j < MCS.length; j++)
                     {
-                        for(let j = 0; j < allusers[key].model_selections[i].history.length; j++)
+                        let checkpoint = true;
+                        for(let k = 0; k < MCS[j].length; k++)
                         {
-                            for(let k = 0; k <allusers[key].model_selections[i].history[j].selections_name.length; k++)
+                            if(MCS[j][k].indexOf('!') !== -1 && !this.models.items.history[i].selections_name.includes(MCS[j][k]))
                             {
-                                allusers[key].model_selections[i].history[j].selections_name[k] = '!'+ allusers[key].model_selections[i].history[j].selections_name[k];
+                                checkpoint = false;
                             }
-                            history.push(allusers[key].model_selections[i].history[j].selections_name.concat(allusers[key].model_selections[i].history[j].disselections_name));
+                            else if(!this.models.items.history[i].selections_name.includes(MCS[j][k].substring(1)))
+                            {
+                                checkpoint = false;
+                            }
                         }
-                    }
-                }
-            }
-            let delete_list = [];
-            for(let i = 0; i < history.length; i++)
-            {
-                for(let j = 0; j < MCS.length; j++)
-                {
-                    let temp = MCS[j];
-                    let temp_length = temp.length;
-                    for(let k = 0; k < temp.length; k++)
-                    {
-                        for(let x = 0; x < history[i].length; x++)
+                        if(checkpoint)
                         {
-                            if(history[i][x]===temp[k])
-                                temp_length--;
+                            result.push(MCS[j]);
                         }
-                    }
-                    if(temp_length === 0 && !delete_list.includes(j))
-                    {
-                        delete_list.push(j);
                     }
                 }
             }
-            let newMCS = [];
-            for(let i = 0; i < delete_list.length; i++)
-            {
-                newMCS.push(MCS[delete_list[i]]);
-            }
-            if(newMCS.length === 0)
-                return '';
-            return newMCS[0];
+            if(result.length !== 0)
+                return result;
+            return '';
+            // let allusers = this.currentuser;
+            // let history = [];
+            // for(let key in allusers)
+            // {
+            //     for(let i = 0 ; i < allusers[key].model_selections.length; i++)
+            //     {
+            //         if(allusers[key].model_selections[i].name === this.currentmodelname && allusers[key].model_selections[i].history.length !== 0)
+            //         {
+            //             for(let j = 0; j < allusers[key].model_selections[i].history.length; j++)
+            //             {
+            //                 for(let k = 0; k <allusers[key].model_selections[i].history[j].selections_name.length; k++)
+            //                 {
+            //                     allusers[key].model_selections[i].history[j].selections_name[k] = '!'+ allusers[key].model_selections[i].history[j].selections_name[k];
+            //                 }
+            //                 history.push(allusers[key].model_selections[i].history[j].selections_name.concat(allusers[key].model_selections[i].history[j].disselections_name));
+            //             }
+            //         }
+            //     }
+            // }
+            // let delete_list = [];
+            // for(let i = 0; i < history.length; i++)
+            // {
+            //     for(let j = 0; j < MCS.length; j++)
+            //     {
+            //         let temp = MCS[j];
+            //         let temp_length = temp.length;
+            //         for(let k = 0; k < temp.length; k++)
+            //         {
+            //             for(let x = 0; x < history[i].length; x++)
+            //             {
+            //                 if(history[i][x]===temp[k])
+            //                     temp_length--;
+            //             }
+            //         }
+            //         if(temp_length === 0 && !delete_list.includes(j))
+            //         {
+            //             delete_list.push(j);
+            //         }
+            //     }
+            // }
+            // let newMCS = [];
+            // for(let i = 0; i < delete_list.length; i++)
+            // {
+            //     newMCS.push(MCS[delete_list[i]]);
+            // }
+            // if(newMCS.length === 0)
+            //     return '';
+            return '';
         },
         getsolution4(MCS){
             let allusers = this.currentuser;

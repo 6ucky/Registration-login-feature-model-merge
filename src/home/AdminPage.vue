@@ -698,26 +698,33 @@ export default {
         },
         getsolution3(MCS){
             let result = [];
-            console.log(this.models);
-            if(this.models.items.history.length !== 0)
+            let modelitem = {};
+            for(let i = 0; i < this.models.items.length; i++)
             {
-                for(let i = 0; i < this.models.items.history.length; i++)
+                if(this.models.items[i].modelname === this.currentmodelname)
+                {
+                    modelitem = this.models.items[i];
+                }
+            }
+            if(modelitem.history.length !== 0)
+            {
+                for(let i = 0; i < modelitem.history.length; i++)
                 {
                     for(let j = 0; j < MCS.length; j++)
                     {
-                        let checkpoint = true;
+                        let checkpoint = 0;
                         for(let k = 0; k < MCS[j].length; k++)
                         {
-                            if(MCS[j][k].indexOf('!') !== -1 && !this.models.items.history[i].selections_name.includes(MCS[j][k]))
+                            if(MCS[j][k].indexOf('!') !== -1 && !modelitem.history[i].selections_name.includes(MCS[j][k].substring(1)))
                             {
-                                checkpoint = false;
+                                checkpoint++;
                             }
-                            else if(!this.models.items.history[i].selections_name.includes(MCS[j][k].substring(1)))
+                            else if(MCS[j][k].indexOf('!') === -1 && !modelitem.history[i].disselections_name.includes(MCS[j][k]))
                             {
-                                checkpoint = false;
+                                checkpoint++;
                             }
                         }
-                        if(checkpoint)
+                        if(checkpoint === MCS[j].length)
                         {
                             result.push(MCS[j]);
                         }

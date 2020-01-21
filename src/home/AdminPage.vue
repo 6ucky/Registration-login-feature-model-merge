@@ -325,10 +325,30 @@ export default {
                 }
                 if(r3)
                 {
-                    this.resultmessage+=' 3';
                     let sol3 = this.getsolution3(MCS);
                     if(sol3 !== '')
+                    {
                         results.push(sol3);
+                        this.resultmessage+=' 3';
+                    }
+                }
+                if(r4)
+                {
+                    let sol4 = this.getsolution4(MCS);
+                    if(sol4 !== '')
+                    {
+                        results.push(sol4);
+                        this.resultmessage+=' 4';
+                    }
+                }
+                if(r5)
+                {
+                    let sol5 = this.getsolution5(MCS);
+                    if(sol5 !== '')
+                    {
+                        results.push(sol5);
+                        this.resultmessage+=' 5';
+                    }
                 }
                 // if(r4)
                 // {
@@ -715,11 +735,11 @@ export default {
                         let checkpoint = 0;
                         for(let k = 0; k < MCS[j].length; k++)
                         {
-                            if(MCS[j][k].indexOf('!') !== -1 && !modelitem.history[i].selections_name.includes(MCS[j][k].substring(1)))
+                            if(MCS[j][k].indexOf('!') !== -1 && modelitem.history[i].selections_name.includes(MCS[j][k].substring(1)))
                             {
                                 checkpoint++;
                             }
-                            else if(MCS[j][k].indexOf('!') === -1 && !modelitem.history[i].disselections_name.includes(MCS[j][k]))
+                            else if(MCS[j][k].indexOf('!') === -1 && modelitem.history[i].disselections_name.includes(MCS[j][k]))
                             {
                                 checkpoint++;
                             }
@@ -734,118 +754,95 @@ export default {
             if(result.length !== 0)
                 return result;
             return '';
-            // let allusers = this.currentuser;
-            // let history = [];
-            // for(let key in allusers)
-            // {
-            //     for(let i = 0 ; i < allusers[key].model_selections.length; i++)
-            //     {
-            //         if(allusers[key].model_selections[i].name === this.currentmodelname && allusers[key].model_selections[i].history.length !== 0)
-            //         {
-            //             for(let j = 0; j < allusers[key].model_selections[i].history.length; j++)
-            //             {
-            //                 for(let k = 0; k <allusers[key].model_selections[i].history[j].selections_name.length; k++)
-            //                 {
-            //                     allusers[key].model_selections[i].history[j].selections_name[k] = '!'+ allusers[key].model_selections[i].history[j].selections_name[k];
-            //                 }
-            //                 history.push(allusers[key].model_selections[i].history[j].selections_name.concat(allusers[key].model_selections[i].history[j].disselections_name));
-            //             }
-            //         }
-            //     }
-            // }
-            // let delete_list = [];
-            // for(let i = 0; i < history.length; i++)
-            // {
-            //     for(let j = 0; j < MCS.length; j++)
-            //     {
-            //         let temp = MCS[j];
-            //         let temp_length = temp.length;
-            //         for(let k = 0; k < temp.length; k++)
-            //         {
-            //             for(let x = 0; x < history[i].length; x++)
-            //             {
-            //                 if(history[i][x]===temp[k])
-            //                     temp_length--;
-            //             }
-            //         }
-            //         if(temp_length === 0 && !delete_list.includes(j))
-            //         {
-            //             delete_list.push(j);
-            //         }
-            //     }
-            // }
-            // let newMCS = [];
-            // for(let i = 0; i < delete_list.length; i++)
-            // {
-            //     newMCS.push(MCS[delete_list[i]]);
-            // }
-            // if(newMCS.length === 0)
-            //     return '';
-            return '';
         },
         getsolution4(MCS){
+            let result = [];
             let allusers = this.currentuser;
-            let totalkey = [];
+            let tempprofile = [];
             for(let key in allusers)
             {
-                totalkey.push(key);
+                if(allusers[key].MCS.r4 && !tempprofile.includes(allusers[key].role + '+' + allusers[key].status))
+                    tempprofile.push(allusers[key].role + '+' + allusers[key].status);
             }
-            let sameprofile = [];
-            for(let i = 0; i < totalkey.length; i++)
+            for(let i = 0; i < tempprofile.length; i++)
             {
-                for(let j = 0; j < totalkey.length; j++)
+                for(let key in allusers)
                 {
-                    if(i !== j && allusers[totalkey[i]].role === allusers[totalkey[j]].role && allusers[totalkey[i]].status === allusers[totalkey[j]].status && !sameprofile.includes(totalkey[i]))
-                        sameprofile.push(totalkey[i]);
-                }
-            }
-            let history = [];
-            for(let key = 0; key < sameprofile.length; key++)
-            {
-                for(let i = 0 ; i < allusers[key].model_selections.length; i++)
-                {
-                    if(allusers[key].model_selections[i].name === this.currentmodelname)
+                    if(allusers[key].role === tempprofile[i].split('+')[0] && allusers[key].status === tempprofile[i].split('+')[1])
                     {
-                        for(let j = 0; j < allusers[key].model_selections[i].selections_name.length; j++)
+                        for(let j = 0; j < allusers[key].model_selections.length; j++)
                         {
-                            allusers[key].model_selections[i].selections_name[j] = '!'+ allusers[key].model_selections[i].selections_name[j];
-                        }
-                        history.push(allusers[key].model_selections[i].selections_name.concat(allusers[key].model_selections[i].disselections_name));
-                    }
-                }
-            }
-            let delete_list = [];
-            for(let i = 0; i < history.length; i++)
-            {
-                for(let j = 0; j < MCS.length; j++)
-                {
-                    let temp = MCS[j];
-                    let temp_length = temp.length;
-                    for(let k = 0; k < temp.length; k++)
-                    {
-                        for(let x = 0; x < history[i].length; x++)
-                        {
-                            if(history[i][x]===temp[k])
-                                temp_length--;
+                            if(allusers[key].model_selections[j].name === this.currentmodelname)
+                            {
+                                for(let k = 0; k < allusers[key].model_selections[j].history.length; k++)
+                                {
+                                    for(let a = 0; a < MCS.length; a++)
+                                    {
+                                        let checkpoint = 0;
+                                        for(let b = 0; b < MCS[a].length; b++)
+                                        {
+                                            if(MCS[a][b].indexOf('!') !== -1 && allusers[key].model_selections[j].history[k].selections_name.includes(MCS[a][b].substring(1)))
+                                            {
+                                                checkpoint++;
+                                            }
+                                            else if(MCS[a][b].indexOf('!') === -1 && allusers[key].model_selections[j].history[k].disselections_name.includes(MCS[a][b]))
+                                            {
+                                                checkpoint++;
+                                            }
+                                        }
+                                        if(checkpoint === MCS[a].length)
+                                        {
+                                            result.push(MCS[a]);
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
-                    if(temp_length === 0 && !delete_list.includes(j))
-                    {
-                        delete_list.push(j);
-                    }
                 }
             }
-            let newMCS = [];
-            for(let i = 0; i < delete_list.length; i++)
-            {
-                newMCS.push(MCS[delete_list[i]]);
-            }
-            if(newMCS.length === 0)
-                return '';
-            return newMCS[0];
+            if(result.length !== 0)
+                return result;
+            return '';
         },
         getsolution5(MCS){
+            let result = [];
+            let allusers = this.currentuser;
 
+            for(let key in allusers)
+            {
+                if(allusers[key].MCS.r5)
+                {
+                    for(let i = 0; i < allusers[key].model_selections.length; i++)
+                    {
+                        if(allusers[key].model_selections[i].name === this.currentmodelname)
+                        {
+                            for(let j = 0; j < MCS.length; j++)
+                            {
+                                let checkpoint = 0;
+                                for(let k = 0; k < MCS[j].length; k++)
+                                {
+                                    if(MCS[j][k].indexOf('!') !== -1 && allusers[key].model_selections[i].selections_name.includes(MCS[j][k].substring(1)))
+                                    {
+                                        checkpoint++;
+                                    }
+                                    else if(MCS[j][k].indexOf('!') === -1 && allusers[key].model_selections[i].disselections_name.includes(MCS[j][k]))
+                                    {
+                                        checkpoint++;
+                                    }
+                                }
+                                if(checkpoint === MCS[j].length)
+                                {
+                                    result.push(MCS[j]);
+                                }
+                            }       
+                        }
+                    }
+                }
+            }
+            if(result.length !== 0)
+                return result;
+            return '';
         },
         // return the final solutions to all the users
         updateallusersolution(selections, disselections){

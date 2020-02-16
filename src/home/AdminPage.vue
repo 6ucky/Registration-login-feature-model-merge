@@ -62,8 +62,8 @@
                                     <th scope="col">R5</th>
                                     <th scope="col">Status</th>
                                     <th scope="col">Role</th>
-                                    <th scope="col">Selections</th>
-                                    <th scope="col">Propagations</th>
+                                    <th scope="col">Desired features</th>
+                                    <th scope="col">Undesired features</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -461,7 +461,7 @@ export default {
                                     if(select_list.includes(source) && unselect_list.includes(target))
                                     {
                                         let requires = [];
-                                        requires.push(source);
+                                        requires.push(target);//require part only considers target
                                         requires.push("!"+target);
                                         this.conflict_results.push(requires);
                                     }
@@ -514,7 +514,7 @@ export default {
                                 if(select_list.includes(source) && unselect_list.includes(target))
                                 {
                                     let requires = [];
-                                    requires.push(source);
+                                    requires.push(target);//require part only considers target
                                     requires.push("!"+target);
                                     this.conflict_results.push(requires);
                                 }

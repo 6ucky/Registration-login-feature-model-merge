@@ -812,12 +812,27 @@ export default {
 										}
 									}
 								}
-								// if the target is in constraint relation and the constraints is 'excludes', 
-								// set the opposite of the target to the source
 								else if(xmlobject.mxGraphModel.root[rel_lists[x]][i].mxCell['@parent'] === modeltype && 
 								xmlobject.mxGraphModel.root[rel_lists[x]][i].mxCell['@target'] === this.data[index].data.nodeId)
 								{
-									if(xmlobject.mxGraphModel.root[rel_lists[x]][i]['@relType'] === 'excludes')
+									// if the constraints is 'requires', set the source false
+									if(xmlobject.mxGraphModel.root[rel_lists[x]][i]['@relType'] === 'requires')
+									{
+										for(let k = 0; k < this.data.length; k++)
+										{
+											// requires conforms to both select and disselect
+											if(xmlobject.mxGraphModel.root[rel_lists[x]][i].mxCell['@source'] === this.data[k].data.nodeId  && !this.data[index].data.tick)
+											{
+												this.data[k].data.tick = this.data[index].data.tick;
+												this.data[k].data.default_tick = true;
+												this.checkclick(k);
+												checkindex = k;
+											}
+										}
+									}
+									// if the target is in constraint relation and the constraints is 'excludes', 
+									// set the opposite of the target to the source	
+									else if(xmlobject.mxGraphModel.root[rel_lists[x]][i]['@relType'] === 'excludes')
 									{
 										for(let k = 0; k < this.data.length; k++)
 										{
@@ -888,12 +903,27 @@ export default {
 									}
 								}
 							}
-							// if the target is in constraint relation and the constraints is 'excludes', 
-							// set the opposite of the target to the source
 							else if(xmlobject.mxGraphModel.root[rel_lists[x]].mxCell['@parent'] === modeltype && 
 							xmlobject.mxGraphModel.root[rel_lists[x]].mxCell['@target'] === this.data[index].data.nodeId)
 							{
-								if(xmlobject.mxGraphModel.root[rel_lists[x]]['@relType'] === 'excludes')
+								// if the constraints is 'requires', set the source false
+								if(xmlobject.mxGraphModel.root[rel_lists[x]]['@relType'] === 'requires')
+								{
+									for(let k = 0; k < this.data.length; k++)
+									{
+										// requires conforms to both select and disselect
+										if(xmlobject.mxGraphModel.root[rel_lists[x]].mxCell['@source'] === this.data[k].data.nodeId && !this.data[index].data.tick)
+										{
+											this.data[k].data.tick = this.data[index].data.tick;
+											this.data[k].data.default_tick = true;
+											this.checkclick(k);
+											checkindex = k;
+										}	
+									}
+								}	
+								// if the target is in constraint relation and the constraints is 'excludes', 
+								// set the opposite of the target to the source
+								else if(xmlobject.mxGraphModel.root[rel_lists[x]]['@relType'] === 'excludes')
 								{
 									for(let k = 0; k < this.data.length; k++)
 									{

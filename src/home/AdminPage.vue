@@ -646,7 +646,7 @@ export default {
             }
             return MCS;
         },
-        getsolution1(MCS){
+        getsolution2(MCS){
             let index = '';
             let maxlength = 0;
             let result = [];
@@ -681,7 +681,7 @@ export default {
             }
             return result;
         },
-        getsolution2(MCS){
+        getsolution1(MCS){
             let index = '';
             let maxlength = 0;
             let result = [];
